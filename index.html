@@ -18,18 +18,21 @@
     <h1>NoteMaster: Identify the Musical Note</h1>
 
     <div id="settings">
-        <h2>Settings</h2>
-        <br>
-        Notation:
-        <label>
-            <input type="radio" name="notation" value="international" checked> International
-        </label>
-        <label>
-            <input type="radio" name="notation" value="german"> German
-        </label>
-        <label>
-            <input type="radio" name="notation" value="solfege">Solfège
-        </label>
+        <h4>Settings</h4>
+        <div id="setting_notation" title="The note notation system">Notation:
+            <label>
+                <input type="radio" name="notation" value="international" checked> International
+            </label>
+            <label>
+                <input type="radio" name="notation" value="german"> German
+            </label>
+            <label>
+                <input type="radio" name="notation" value="solfege">Solfège
+            </label>
+        </div>
+        <br><br>
+        <div id="octave-settings" title="The octaves to include, in scientific pitch notation."></div>
+
     </div>
 
     <div id="status">
@@ -52,6 +55,37 @@
 
         let currentNotation = "international";
         let currentNote = "";
+
+        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list
+        let selectedOctaves = [...availableOctaves]; // Initial selection
+
+        function updateOctaves() {
+            selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
+                                .map(checkbox => checkbox.value);
+            // If none is selected, select all.
+            if(selectedOctaves.length === 0) {
+                selectedOctaves = [...availableOctaves];
+            }
+            console.log(selectedOctaves); // For debugging
+        }
+
+        function generateIncludedOctavesCheckboxes() {
+            const container = document.getElementById("octave-settings");
+            container.innerHTML = "Octaves (SPN):";
+
+            availableOctaves.forEach(octave => {
+                const label = document.createElement("label");
+                label.innerHTML = `
+                    <input type="checkbox" name="octave" value="${octave}" checked> ${octave}
+                `;
+                container.appendChild(label);
+                //container.appendChild(document.createElement("br"));
+            });
+
+            document.querySelectorAll('input[name="octave"]').forEach(checkbox => {
+                checkbox.addEventListener("change", updateOctaves);
+            });
+        }
 
         function getRandomNote() {
             const notes = noteSystems[currentNotation];
@@ -101,10 +135,10 @@
             return [note_out, suggested_clef];
         }
 
-        function renderNote() {
+        function renderMusicalNote() {
             currentNote = getRandomNote();
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
-            const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, ["C2", "C3", "C4"]);
+            const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, selectedOctaves);
             const abcString = `X:1\nL:1/4\nK:C ${suggestedCleve}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
             const result = document.getElementById("result");
@@ -122,10 +156,10 @@
             num_tries++;
             const status = document.getElementById("status");
             status.textContent = `Score: ${num_correct}/${num_tries}`;
-            setTimeout(renderNote, 2000);
+            setTimeout(renderMusicalNote, 2000);
         }
 
-        function createButtons() {
+        function createAnswerButtons() {
             const container = document.getElementById("buttons");
             container.innerHTML = "";
             noteSystems[currentNotation].forEach(note => {
@@ -140,13 +174,15 @@
         document.querySelectorAll("input[name='notation']").forEach(radio => {
             radio.addEventListener("change", (event) => {
                 currentNotation = event.target.value;
-                createButtons();
-                renderNote();
+                createAnswerButtons();
+                renderMusicalNote();
             });
         });
 
-        createButtons();
-        renderNote();
+        // Initialize checkboxes
+        generateIncludedOctavesCheckboxes();
+        createAnswerButtons();
+        renderMusicalNote();
     </script>
 </body>
 </html>
