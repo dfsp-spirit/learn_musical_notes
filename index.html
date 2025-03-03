@@ -7,19 +7,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.0.0/abcjs-basic-min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        #settings { margin: 20px; }
+        #settings {
+            display: none; /* Hidden by default */
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        #toggle-settings {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
         #status { margin: 20px; min-height: 40px; }
         #buttons { margin-top: 20px; }
         button { margin: 5px; padding: 10px; font-size: 16px; }
+        button:disabled {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
         #notation { margin: 0 auto; width: 200px; min-height: 80px; }
     </style>
 </head>
 <body>
     <h1>NoteMaster: Identify the Musical Note</h1>
 
+    <button id="toggle-settings">▶ Settings</button>
     <div id="settings">
         <h4>Settings</h4>
-        <div id="setting_notation" title="The note notation system">Notation:
+        <div id="setting_notation" title="The note nomenclature system">Nomenclature:
             <label>
                 <input type="radio" name="notation" value="international" checked> International
             </label>
@@ -48,7 +66,7 @@
 
     </div>
 
-    <div id="status">
+    <div id="status">Click on the correct note!
     </div>
 
 
@@ -72,7 +90,7 @@
         let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";
 
         let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list
-        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || [...availableOctaves];
+        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];
 
         function updateOctaves() {
             selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
@@ -160,8 +178,13 @@
             const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
             const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
-            const result = document.getElementById("result");  // Remove correct/false message from previous question
+            // Remove the correct/false message from previous question
+            const result = document.getElementById("result");
             result.textContent = "";
+            // Re-enable answer buttons
+            document.querySelectorAll(".answer-btn").forEach(button => {
+                button.disabled = false;
+            });
         }
 
         function checkAnswer(note) {
@@ -175,6 +198,11 @@
             num_tries++;
             const status = document.getElementById("status");
             status.textContent = `Score: ${num_correct}/${num_tries}`;
+
+            // disable buttons until next question, so user cannot accidently answer twice
+            document.querySelectorAll(".answer-btn").forEach(button => {
+                button.disabled = true;
+            });
             setTimeout(renderMusicalNote, 1000);
         }
 
@@ -184,6 +212,7 @@
             noteSystems[currentNotation].forEach(note => {
                 const btn = document.createElement("button");
                 btn.textContent = note;
+                btn.classList.add("answer-btn");
                 btn.onclick = () => checkAnswer(note);
                 container.appendChild(btn);
             });
@@ -205,6 +234,19 @@
                 localStorage.setItem("currentClef", JSON.stringify(currentClef)); // Save to localStorage
                 renderMusicalNote();
             });
+        });
+
+        document.getElementById("toggle-settings").addEventListener("click", function() {
+            const settingsDiv = document.getElementById("settings");
+            const button = this;
+
+            if (settingsDiv.style.display === "none") {
+                settingsDiv.style.display = "block";
+                button.textContent = "▼ Settings"; // Change arrow down
+            } else {
+                settingsDiv.style.display = "none";
+                button.textContent = "▶ Settings"; // Change arrow right
+            }
         });
 
         // Initialize checkboxes
