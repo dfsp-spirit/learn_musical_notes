@@ -34,7 +34,7 @@
 <body>
     <h1>NoteMaster: Identify the Musical Note</h1>
 
-    <button id="toggle-settings">▶ Settings & Timer</button>
+    <button id="toggle-settings" title="Toggle display of settings and timer">▶ Settings & Timer</button>
     <div id="settings">
         <h4>Settings</h4>
         <div id="setting_notation" title="The note nomenclature system">Nomenclature:
@@ -73,7 +73,7 @@
         <p>Note has been displayed for: <span id="timer">0.00</span> seconds</p>
     </div>
 
-    <div id="status" title="Average time is for correct identifications only.">Click on the correct note!
+    <div id="status" title="Go for it!">Click the correct note name!
     </div>
 
 
@@ -223,12 +223,14 @@
             document.getElementById("timer").textContent = "0.00"; // Reset timer
             const status = document.getElementById("status");
             status.textContent = `Score: ${num_correct}/${num_tries}`;
+            status.title = "Your score. Keep it up!";
 
             // Show average time for correct clicks
             if(num_correct >= 5) {
                 const average_time = correct_identification_times.reduce((a, b) => a + b, 0) / correct_identification_times.length;
                 const average_time_s = average_time / 1000;
                 status.textContent += ` | Average time: ${average_time_s.toFixed(1)} s`;
+                status.title = "Your score. Keep it up! The average time is for correct answers only.";
             }
             //
 
@@ -256,7 +258,8 @@
             num_tries = 0;
             correct_identification_times = [];
             const status = document.getElementById("status");
-            status.textContent = `Click on the correct note!`;
+            status.textContent = `Click the correct note name!`;
+            status.title = "Go for it!";
             renderMusicalNote();
         }
 
