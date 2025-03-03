@@ -75,31 +75,37 @@
 
             const note = noteName.toUpperCase();
             let note_out = note;
+            let suggested_clef = "treble";
             if(octave === "C1") {
                 note_out = note + ",,";
+                suggested_clef = "bass";
             } else if (octave === "C2") {
                 note_out = note + ",";
+                suggested_clef = "bass";
             } else if (octave === "C3") {
                 note_out = note;
+                suggested_clef = "treble";
             } else if (octave === "C4") {
                 note_out = note.toLowerCase();
+                suggested_clef = "treble";
             } else if (octave === "C5") {
                 note_out = note.toLowerCase() + "'";
+                suggested_clef = "treble";
             } else if (octave === "C6") {
                 note_out = note.toLowerCase() + "''";
+                suggested_clef = "treble";
             } else {
                 console.error("Invalid octave");
-                return note;
             }
-            console.log("Transforming note", note, "to", note_out, "in octave", octave);
-            return note_out;
+            console.log("Transforming note", note, "to", note_out, "in octave", octave, ". Suggested clef:", suggested_clef);
+            return [note_out, suggested_clef];
         }
 
         function renderNote() {
             currentNote = getRandomNote();
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
-            const noteNameSPN = toOctaveSPN(noteName, ["C3", "C4"]);
-            const abcString = `X:1\nL:1/4\n${noteNameSPN}`;
+            const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, ["C2", "C3", "C4"]);
+            const abcString = `X:1\nL:1/4\nK:C ${suggestedCleve}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
             const result = document.getElementById("result");
             result.textContent = "";
