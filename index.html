@@ -54,15 +54,21 @@
         <div id="setting_clef" title="The clef to use. Setting it to auto will use a suitable clef based on the note. If you force a clef, you may want to limit octaves above.">
             Clef:
             <label>
-                <input type="radio" name="clef" value="auto" checked> Auto
+                <input type="radio" name="clef" value="auto" checked> <i>Auto</i>
             </label>
             <label>
                 <input type="radio" name="clef" value="bass"> Bass
             </label>
             <label>
-                <input type="radio" name="clef" value="violin"> Violin
+                <input type="radio" name="clef" value="violin"> Treble
+            </label>
+            <label>
+                <input type="radio" name="clef" value="alto"> Alto
             </label>
         </div>
+        <br>
+        <button id="startOverButton">Start over</button>
+        <br>
         <h4>Timer</h4>
         <p>Note has been displayed for: <span id="timer">0.00</span> seconds</p>
     </div>
@@ -244,6 +250,17 @@
                 container.appendChild(btn);
             });
         }
+
+        function startOver() {
+            num_correct = 0;
+            num_tries = 0;
+            correct_identification_times = [];
+            const status = document.getElementById("status");
+            status.textContent = `Click on the correct note!`;
+            renderMusicalNote();
+        }
+
+        document.getElementById("startOverButton").addEventListener("click", startOver);
 
 
         document.querySelectorAll("input[name='notation']").forEach(radio => {
