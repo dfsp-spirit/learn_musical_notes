@@ -30,8 +30,21 @@
                 <input type="radio" name="notation" value="solfege">Solfège
             </label>
         </div>
-        <br><br>
+        <br>
         <div id="octave-settings" title="The octaves to include, in scientific pitch notation."></div>
+        <br>
+        <div id="setting_clef" title="The clef to use. Setting it to auto will use a suitable clef based on the note. If you force a clef, you may want to limit octaves above.">
+            Clef:
+            <label>
+                <input type="radio" name="clef" value="auto" checked> Auto
+            </label>
+            <label>
+                <input type="radio" name="clef" value="bass"> Bass
+            </label>
+            <label>
+                <input type="radio" name="clef" value="violin"> Violin
+            </label>
+        </div>
 
     </div>
 
@@ -53,20 +66,26 @@
         let num_correct = 0;
         let num_tries = 0;
 
-        let currentNotation = "international";
+        let currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";
         let currentNote = "";
 
+        let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";
+
         let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list
-        let selectedOctaves = [...availableOctaves]; // Initial selection
+        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || [...availableOctaves];
 
         function updateOctaves() {
             selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
                                 .map(checkbox => checkbox.value);
+
             // If none is selected, select all.
             if(selectedOctaves.length === 0) {
                 selectedOctaves = [...availableOctaves];
             }
-            console.log(selectedOctaves); // For debugging
+
+            localStorage.setItem("selectedOctaves", JSON.stringify(selectedOctaves)); // Save to localStorage
+            console.log("Selected octaves: ", selectedOctaves); // For debugging
+            renderMusicalNote();
         }
 
         function generateIncludedOctavesCheckboxes() {
@@ -75,9 +94,8 @@
 
             availableOctaves.forEach(octave => {
                 const label = document.createElement("label");
-                label.innerHTML = `
-                    <input type="checkbox" name="octave" value="${octave}" checked> ${octave}
-                `;
+                const isChecked = selectedOctaves.includes(octave) ? "checked" : "";
+                label.innerHTML = `<input type="checkbox" name="octave" value="${octave}" ${isChecked}> ${octave}`;
                 container.appendChild(label);
                 //container.appendChild(document.createElement("br"));
             });
@@ -139,9 +157,10 @@
             currentNote = getRandomNote();
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
             const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, selectedOctaves);
-            const abcString = `X:1\nL:1/4\nK:C ${suggestedCleve}\n ${noteNameSPN}`;
+            const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
+            const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
-            const result = document.getElementById("result");
+            const result = document.getElementById("result");  // Remove correct/false message from previous question
             result.textContent = "";
         }
 
@@ -156,7 +175,7 @@
             num_tries++;
             const status = document.getElementById("status");
             status.textContent = `Score: ${num_correct}/${num_tries}`;
-            setTimeout(renderMusicalNote, 2000);
+            setTimeout(renderMusicalNote, 1000);
         }
 
         function createAnswerButtons() {
@@ -174,7 +193,16 @@
         document.querySelectorAll("input[name='notation']").forEach(radio => {
             radio.addEventListener("change", (event) => {
                 currentNotation = event.target.value;
+                localStorage.setItem("currentNotation", JSON.stringify(currentNotation)); // Save to localStorage
                 createAnswerButtons();
+                renderMusicalNote();
+            });
+        });
+
+        document.querySelectorAll("input[name='clef']").forEach(radio => {
+            radio.addEventListener("change", (event) => {
+                currentClef = event.target.value;
+                localStorage.setItem("currentClef", JSON.stringify(currentClef)); // Save to localStorage
                 renderMusicalNote();
             });
         });
