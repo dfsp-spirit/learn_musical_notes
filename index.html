@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteMaster: Musical Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.0.0/abcjs-basic-min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #settings { margin: 20px; }
+        #buttons { margin-top: 20px; }
+        button { margin: 5px; padding: 10px; font-size: 16px; }
+        #notation { margin: 0 auto; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>NoteMaster: Identify the Musical Note</h1>
+
+    <div id="settings">
+        <h2>Settings</h2>
+        <br>
+        Notation:
+        <label>
+            <input type="radio" name="notation" value="international" checked> International
+        </label>
+        <label>
+            <input type="radio" name="notation" value="german"> German
+        </label>
+        <label>
+            <input type="radio" name="notation" value="solfege">Solfège
+        </label>
+    </div>
+
+    <div id="notation"></div>
+    <div id="buttons"></div>
+    <p id="result"></p>
+
+    <script>
+        const noteSystems = {
+            international: ["C", "D", "E", "F", "G", "A", "B"],
+            german: ["C", "D", "E", "F", "G", "A", "H"],
+            solfege: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"]
+        };
+
+        let currentNotation = "international";
+        let currentNote = "";
+
+        function getRandomNote() {
+            const notes = noteSystems[currentNotation];
+            return notes[Math.floor(Math.random() * notes.length)];
+        }
+
+        function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5"]) {
+            return octaves[Math.floor(Math.random() * octaves.length)];
+        }
+
+        function toOctaveSPN(noteName, octave="C4") {
+
+            if(octave === "random") {
+                octave = getRandomOctaveFrom();
+            }
+
+            // If octave is a list of strings, treat it as a list of allowed octaves
+            if(Array.isArray(octave)) {
+                octave = getRandomOctaveFrom(octave);
+            }
+
+            const note = noteName.toUpperCase();
+            let note_out = note;
+            if(octave === "C1") {
+                note_out = note + ",,";
+            } else if (octave === "C2") {
+                note_out = note + ",";
+            } else if (octave === "C3") {
+                note_out = note;
+            } else if (octave === "C4") {
+                note_out = note + "'";
+            } else if (octave === "C5") {
+                note_out = note + "''";
+            } else {
+                console.error("Invalid octave");
+                return note;
+            }
+            console.log("Transforming note", note, "to", note_out, "in octave", octave);
+            return note_out;
+        }
+
+        function renderNote() {
+            currentNote = getRandomNote();
+            const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
+            const noteNameSPN = toOctaveSPN(noteName, ["C3", "C4"]);
+            const abcString = `X:1\nL:1/4\n${noteNameSPN}`;
+            ABCJS.renderAbc("notation", abcString);
+            result.textContent = "";
+        }
+
+        function checkAnswer(note) {
+            const result = document.getElementById("result");
+            if (note === currentNote) {
+                result.textContent = "✅ Correct, it's " + note + "!";
+            } else {
+                result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + note + ".";
+            }
+            setTimeout(renderNote, 2000);
+        }
+
+        function createButtons() {
+            const container = document.getElementById("buttons");
+            container.innerHTML = "";
+            noteSystems[currentNotation].forEach(note => {
+                const btn = document.createElement("button");
+                btn.textContent = note;
+                btn.onclick = () => checkAnswer(note);
+                container.appendChild(btn);
+            });
+        }
+
+
+        document.querySelectorAll("input[name='notation']").forEach(radio => {
+            radio.addEventListener("change", (event) => {
+                currentNotation = event.target.value;
+                createButtons();
+                renderNote();
+            });
+        });
+
+        createButtons();
+        renderNote();
+    </script>
+</body>
+</html>
