@@ -8,6 +8,7 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #settings { margin: 20px; }
+        #status { margin: 20px; }
         #buttons { margin-top: 20px; }
         button { margin: 5px; padding: 10px; font-size: 16px; }
         #notation { margin: 0 auto; width: 200px; }
@@ -31,6 +32,10 @@
         </label>
     </div>
 
+    <div id="status">
+    </div>
+
+
     <div id="notation"></div>
     <div id="buttons"></div>
     <p id="result"></p>
@@ -41,6 +46,9 @@
             german: ["C", "D", "E", "F", "G", "A", "H"],
             solfege: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"]
         };
+
+        let num_correct = 0;
+        let num_tries = 0;
 
         let currentNotation = "international";
         let currentNote = "";
@@ -74,9 +82,11 @@
             } else if (octave === "C3") {
                 note_out = note;
             } else if (octave === "C4") {
-                note_out = note + "'";
+                note_out = note.toLowerCase();
             } else if (octave === "C5") {
-                note_out = note + "''";
+                note_out = note.toLowerCase() + "'";
+            } else if (octave === "C6") {
+                note_out = note.toLowerCase() + "''";
             } else {
                 console.error("Invalid octave");
                 return note;
@@ -91,6 +101,7 @@
             const noteNameSPN = toOctaveSPN(noteName, ["C3", "C4"]);
             const abcString = `X:1\nL:1/4\n${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
+            const result = document.getElementById("result");
             result.textContent = "";
         }
 
@@ -98,9 +109,13 @@
             const result = document.getElementById("result");
             if (note === currentNote) {
                 result.textContent = "✅ Correct, it's " + note + "!";
+                num_correct++;
             } else {
                 result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + note + ".";
             }
+            num_tries++;
+            const status = document.getElementById("status");
+            status.textContent = `Score: ${num_correct}/${num_tries}`;
             setTimeout(renderNote, 2000);
         }
 
