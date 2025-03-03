@@ -34,7 +34,7 @@
 <body>
     <h1>NoteMaster: Identify the Musical Note</h1>
 
-    <button id="toggle-settings">▶ Settings</button>
+    <button id="toggle-settings">▶ Settings & Timer</button>
     <div id="settings">
         <h4>Settings</h4>
         <div id="setting_notation" title="The note nomenclature system">Nomenclature:
@@ -63,10 +63,11 @@
                 <input type="radio" name="clef" value="violin"> Violin
             </label>
         </div>
-
+        <h4>Timer</h4>
+        <p>Note has been displayed for: <span id="timer">0.00</span> seconds</p>
     </div>
 
-    <div id="status">Click on the correct note!
+    <div id="status" title="Average time is for correct identifications only.">Click on the correct note!
     </div>
 
 
@@ -83,6 +84,10 @@
 
         let num_correct = 0;
         let num_tries = 0;
+
+        let display_note_start_time;
+        let display_note_interval = null;
+        let correct_identification_times = [];
 
         let currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";
         let currentNote = "";
@@ -178,6 +183,16 @@
             const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
             const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
+
+            display_note_start_time = Date.now();
+            if (display_note_interval) clearInterval(display_note_interval);
+
+            // Update time every 100 ms
+            display_note_interval = setInterval(() => {
+                let elapsedSeconds = (Date.now() - display_note_start_time) / 1000;
+                document.getElementById("timer").textContent = elapsedSeconds.toFixed(1);
+            }, 100);
+
             // Remove the correct/false message from previous question
             const result = document.getElementById("result");
             result.textContent = "";
@@ -192,12 +207,24 @@
             if (note === currentNote) {
                 result.textContent = "✅ Correct, it's " + note + "!";
                 num_correct++;
+                const time_to_answer = Date.now() - display_note_start_time;
+                correct_identification_times.push(time_to_answer);
             } else {
                 result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + note + ".";
             }
             num_tries++;
+            if (display_note_interval) clearInterval(display_note_interval);
+            document.getElementById("timer").textContent = "0.00"; // Reset timer
             const status = document.getElementById("status");
             status.textContent = `Score: ${num_correct}/${num_tries}`;
+
+            // Show average time for correct clicks
+            if(num_correct >= 5) {
+                const average_time = correct_identification_times.reduce((a, b) => a + b, 0) / correct_identification_times.length;
+                const average_time_s = average_time / 1000;
+                status.textContent += ` | Average time: ${average_time_s.toFixed(1)} s`;
+            }
+            //
 
             // disable buttons until next question, so user cannot accidently answer twice
             document.querySelectorAll(".answer-btn").forEach(button => {
@@ -239,12 +266,12 @@
             const settingsDiv = document.getElementById("settings");
             const button = this;
 
-            if (settingsDiv.style.display === "none") {
+            if (window.getComputedStyle(settingsDiv).display === "none") {
                 settingsDiv.style.display = "block";
-                button.textContent = "▼ Settings"; // Change arrow down
+                button.textContent = "▼ Settings & Timer"; // Change arrow down
             } else {
                 settingsDiv.style.display = "none";
-                button.textContent = "▶ Settings"; // Change arrow right
+                button.textContent = "▶ Settings & Timer"; // Change arrow right
             }
         });
 
