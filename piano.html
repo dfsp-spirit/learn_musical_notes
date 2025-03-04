@@ -35,32 +35,101 @@
         .key.black.active {
             background-color: #555; /* Darker highlight for black keys */
         }
+        .key.highlighted {
+            background-color: #ff4444; /* Red highlight for white keys */
+        }
+        .key.black.highlighted {
+            background-color: #cc0000; /* Darker red highlight for black keys */
+        }
     </style>
 </head>
 <body>
     <div class="piano">
-        <div class="key" data-note="C"></div>
-        <div class="key black" data-note="C#"></div>
-        <div class="key" data-note="D"></div>
-        <div class="key black" data-note="D#"></div>
-        <div class="key" data-note="E"></div>
-        <div class="key" data-note="F"></div>
-        <div class="key black" data-note="F#"></div>
-        <div class="key" data-note="G"></div>
-        <div class="key black" data-note="G#"></div>
-        <div class="key" data-note="A"></div>
-        <div class="key black" data-note="A#"></div>
-        <div class="key" data-note="B"></div>
+        <div class="key" data-note="C4"></div>
+        <div class="key black" data-note="C#4"></div>
+        <div class="key" data-note="D4"></div>
+        <div class="key black" data-note="D#4"></div>
+        <div class="key" data-note="E4"></div>
+        <div class="key" data-note="F4"></div>
+        <div class="key black" data-note="F#4"></div>
+        <div class="key" data-note="G4"></div>
+        <div class="key black" data-note="G#4"></div>
+        <div class="key" data-note="A4"></div>
+        <div class="key black" data-note="A#4"></div>
+        <div class="key" data-note="B4"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script>
         const keys = document.querySelectorAll('.key');
 
+        // Create a new sampler to play sounds via Tone.js
+        const piano = new Tone.Sampler({
+            urls: {
+                "C4": "C4.mp3",
+                "C#4": "Db4.mp3",
+                "Db4": "Db4.mp3",
+                "D4": "D4.mp3",
+                "D#4": "Eb4.mp3",
+                "Eb4": "Eb4.mp3",
+                "E4": "E4.mp3",
+                "F4": "F4.mp3",
+                "F#4": "Gb4.mp3",
+                "Gb4": "Gb4.mp3",
+                "G4": "G4.mp3",
+                "Ab4": "Ab4.mp3",
+                "G#4": "Ab4.mp3",
+                "A4": "A4.mp3",
+                "A#4": "Bb4.mp3",
+                "Bb4": "Bb4.mp3",
+                "B4": "B4.mp3",
+            },
+            baseUrl: "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/", // Piano soundfont
+            onload: () => {
+                console.log("Piano loaded!");
+            }
+        }).toDestination();
+
+        // Function to play a note
+        function playNote(note) {
+            if (Tone.context.state !== 'running') {
+                Tone.context.resume(); // Resume the AudioContext if it's suspended
+            }
+            piano.triggerAttackRelease(note, "8n"); // Play the note for an 8th note duration
+        }
+
+        // Function to highlight a key, e.g., to show when a note is played, or to instruct somebody which key to press
+        // @param {String} note - The note to highlight, e.g., "C", "D#", "F#"
+        // @param {Number} highlightTime - The time in milliseconds to keep the key highlighted. Set to 0 to keep it highlighted indefinitely.
+        function highlightKey(note, highlightTime = 0) {
+            keys.forEach(key => {
+                if (key.dataset.note === note) {
+                    key.classList.add('highlighted');
+                    if (highlightTime > 0) {
+                        setTimeout(() => {
+                            key.classList.remove('highlighted');
+                        }, highlightTime);
+                    }
+
+                }
+            });
+        }
+
+        // Function to remove all highlights
+        function removeHighlights() {
+            keys.forEach(key => {
+                key.classList.remove('highlighted');
+            });
+        }
+
+        // Function to play a note
         keys.forEach(key => {
             key.addEventListener('mousedown', () => {
                 key.classList.add('active');
                 // Play sound or perform other actions here
                 console.log(key.dataset.note);
+                playNote(key.dataset.note);
+                //highlightKey(key.dataset.note, 300); // Highlight the key for 300 milliseconds
             });
 
             key.addEventListener('mouseup', () => {
@@ -71,6 +140,40 @@
                 key.classList.remove('active');
             });
         });
+
+        function triggerNote(note) {
+            playNote(note);
+            highlightKey(note, 200);
+        }
+
+        document.addEventListener('keydown', (event) => {
+        if (event.key === 'a') {  // Start with the 7 flat notes (a to j)
+            triggerNote('C4');
+        } else if (event.key === "s") {
+            triggerNote('D4');
+        } else if (event.key === 'd') {
+            triggerNote('E4');
+        } else if(event.key === "f") {
+            triggerNote('F4');
+        } else if(event.key === "g") {
+            triggerNote('G4');
+        } else if(event.key === "h") {
+            triggerNote('A4');
+        } else if(event.key === "j") {
+            triggerNote('B4'); // Now the top row (5 sharps)
+        } else if(event.key === "w") {
+            triggerNote('C#4');
+        } else if(event.key === "e") {
+            triggerNote('D#4');
+        } else if(event.key === "t") {
+            triggerNote('F#4');
+        } else if(event.key === "y" || event.key === "z") {    // Allow z for my German keyboard
+            triggerNote('G#4');
+        } else if(event.key === "u") {
+            triggerNote('A#4');
+        }
+});
+
     </script>
 </body>
 </html>
