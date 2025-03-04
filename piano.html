@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Piano Keyboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
     <style>
         .piano {
             display: flex;
@@ -90,6 +91,9 @@
             }
         }).toDestination();
 
+        let isMouseDown = false; // Track if the mouse button is pressed
+        let lastPlayedNote = null; // Track the last played note to avoid repeats
+
         // Function to play a note
         function playNote(note) {
             if (Tone.context.state !== 'running') {
@@ -110,7 +114,6 @@
                             key.classList.remove('highlighted');
                         }, highlightTime);
                     }
-
                 }
             });
         }
@@ -125,20 +128,43 @@
         // Function to play a note
         keys.forEach(key => {
             key.addEventListener('mousedown', () => {
+                isMouseDown = true;
                 key.classList.add('active');
                 // Play sound or perform other actions here
-                console.log(key.dataset.note);
-                playNote(key.dataset.note);
-                //highlightKey(key.dataset.note, 300); // Highlight the key for 300 milliseconds
+                const note = key.dataset.note;
+                console.log(note);
+                playNote(note);
+                lastPlayedNote = note;
             });
 
+            // Handle mouse move
+            key.addEventListener('mousemove', () => {
+                if (isMouseDown) {
+                    key.classList.add('active');
+                    const note = key.dataset.note;
+                    if (note !== lastPlayedNote) { // Avoid playing the same note repeatedly
+                        playNote(note);
+                        lastPlayedNote = note; // Update the last played note
+                    }
+                }
+            });
+
+            // Handle mouse up
             key.addEventListener('mouseup', () => {
-                key.classList.remove('active');
+                isMouseDown = false;
+                lastPlayedNote = null; // Reset the last played note
             });
 
+            // Handle mouse leave
             key.addEventListener('mouseleave', () => {
                 key.classList.remove('active');
             });
+        });
+
+        // Handle mouse up globally (in case the mouse is released outside a key)
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            lastPlayedNote = null; // Reset the last played note
         });
 
         function triggerNote(note) {
@@ -147,7 +173,7 @@
         }
 
         document.addEventListener('keydown', (event) => {
-            const keyMap = {
+            const keyMap = {  // TODO: this keymap is specific to English/German keyboards, provide alternatives for other keyboard layouts.
                 'a': 'C4', // flats
                 's': 'D4',
                 'd': 'E4',
@@ -163,7 +189,7 @@
                 't': 'F#4',
                 'G': 'G#4',
                 'y': 'G#4',
-                'z': 'G#4',  // For AZERTY keyboards
+                'z': 'G#4',  // also allow z as replacement for y (for German QWERTZ keyboards)
                 'H': 'A#4',
                 'u': 'A#4'
             };
