@@ -174,7 +174,10 @@ function initializePiano(options = {}) {
         "FR": { // AZERTY keyboard
             'a': 'C4', 'z': 'D4', 'e': 'E4', 'r': 'F4', 't': 'G4', 'y': 'A4', 'u': 'B4', 'i': 'C5',
             'q': 'C#4', 's': 'D#4', 'd': 'F#4', 'f': 'G#4', 'g': 'A#4'
+        },
+        "--" : { // Dummy keymap to disable computer keyboard input. Useful for touch devices or webpages that have their own keyboard input.
         }
+        // Add more keymaps here if needed
     };
 
     // Function to dynamically populate the select element
