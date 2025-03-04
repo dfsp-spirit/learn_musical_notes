@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Keyboard</title>
+    <style>
+        .piano {
+            display: flex;
+            margin-top: 20px;
+        }
+        .key {
+            width: 40px;
+            height: 220px;
+            border: 1px solid #000;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 0 0 8px 8px; /* Rounded corners at the bottom */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+            transition: background-color 0.1s ease; /* Smooth transition for highlighting */
+        }
+        .key.black {
+            width: 25px;
+            height: 140px;
+            background-color: black;
+            margin-left: -15px;
+            margin-right: -15px;
+            z-index: 1;
+            border-radius: 0 0 6px 6px; /* Rounded corners for black keys */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
+        }
+        .key.active {
+            background-color: #ccc; /* Highlight color when key is pressed */
+        }
+        .key.black.active {
+            background-color: #555; /* Darker highlight for black keys */
+        }
+    </style>
+</head>
+<body>
+    <div class="piano">
+        <div class="key" data-note="C"></div>
+        <div class="key black" data-note="C#"></div>
+        <div class="key" data-note="D"></div>
+        <div class="key black" data-note="D#"></div>
+        <div class="key" data-note="E"></div>
+        <div class="key" data-note="F"></div>
+        <div class="key black" data-note="F#"></div>
+        <div class="key" data-note="G"></div>
+        <div class="key black" data-note="G#"></div>
+        <div class="key" data-note="A"></div>
+        <div class="key black" data-note="A#"></div>
+        <div class="key" data-note="B"></div>
+    </div>
+
+    <script>
+        const keys = document.querySelectorAll('.key');
+
+        keys.forEach(key => {
+            key.addEventListener('mousedown', () => {
+                key.classList.add('active');
+                // Play sound or perform other actions here
+                console.log(key.dataset.note);
+            });
+
+            key.addEventListener('mouseup', () => {
+                key.classList.remove('active');
+            });
+
+            key.addEventListener('mouseleave', () => {
+                key.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
