@@ -1,10 +1,11 @@
 // Non-module version of the piano code
 function initializePiano(options = {}) {
-    const {
+    let {
         octaves = ["C4", "C5"],
         extraHighCAfter = true,
         baseUrl = "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/", // ... or to use local files: "./samples/",
         containerId = "pianocontainer",
+        current_keymap = "en"  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
     } = options;
 
     // Function to generate piano keys (the HTML structure)
@@ -27,7 +28,16 @@ function initializePiano(options = {}) {
             keys.push(extraC);
         }
 
-        return `<div class="piano">\n${keys.join("\n")}\n</div>`;
+        const keyboardLayoutDropdown = `<div class="keyboard-layout-dropdown">
+        <select id="keyboard-layout">
+            <option value="EN">EN</option>
+            <option value="DE">DE</option>
+            <option value="FR">FR</option>
+        </select>
+    </div>`;
+
+        const piano = `<div class="piano">\n${keys.join("\n")}\n</div>`;
+        return keyboardLayoutDropdown + piano;
     }
 
     // Add the piano keys to the container
@@ -150,13 +160,63 @@ function initializePiano(options = {}) {
         highlightKey(note, 200);
     }
 
+    // Provide several keymaps for different keyboards. For now, we only provide some basic western keymaps.
+    // Feel free to add more keymaps if needed.
+    // Keymaps are stored in a dictionary. The key is the language code (e.g., "en" for English).
+    const keymaps = {
+        "en": {  // QWERTY keyboard
+            'a': 'C4', 's': 'D4', 'd': 'E4', 'f': 'F4', 'g': 'G4', 'h': 'A4', 'j': 'B4', 'k': 'C5',
+            'A': 'C#4', 'w': 'C#4', 'S': 'D#4', 'e': 'D#4', 'F': 'F#4', 't': 'F#4', 'G': 'G#4', 'y': 'G#4',
+            'H': 'A#4', 'u': 'A#4'
+        },
+        "de": { // QWERTZ keyboard
+            'a': 'C4', 's': 'D4', 'd': 'E4', 'f': 'F4', 'g': 'G4', 'h': 'A4', 'j': 'B4', 'k': 'C5',
+            'A': 'C#4', 'w': 'C#4', 'S': 'D#4', 'e': 'D#4', 'F': 'F#4', 't': 'F#4', 'G': 'G#4', 'z': 'G#4',
+            'H': 'A#4', 'u': 'A#4'
+        },
+        "fr": { // AZERTY keyboard
+            'a': 'C4', 'z': 'D4', 'e': 'E4', 'r': 'F4', 't': 'G4', 'y': 'A4', 'u': 'B4', 'i': 'C5',
+            'q': 'C#4', 's': 'D#4', 'd': 'F#4', 'f': 'G#4', 'g': 'A#4'
+        }
+    };
+
+    // Function to dynamically populate the select element
+    function populateSelect() {
+        const selectElement = document.getElementById("keyboard-layout");
+
+        // Clear any existing options
+        selectElement.innerHTML = '';
+
+        // Loop through the keymaps object to create options
+        for (const keymap in keymaps) {
+            if (keymaps.hasOwnProperty(keymap)) {
+                const option = document.createElement("option");
+                option.value = keymap;
+                option.textContent = keymap.toUpperCase(); // Option text as "EN", "DE", "FR"
+
+                // Set the selected option based on the current_keymap variable
+                if (keymap === current_keymap) {
+                    option.selected = true;
+                }
+
+                selectElement.appendChild(option);
+                console.log("Appending option:", keymap); // This line is just for debugging
+            }
+        }
+
+        // Add an event listener to update the current_keymap when the user selects an option
+        selectElement.addEventListener('change', function() {
+            current_keymap = selectElement.value;
+            console.log("Selected keymap:", current_keymap); // This line is just for debugging
+        });
+    }
+
+    // Call the function to populate the select element
+    populateSelect();
+
     // Add event listener for computer keyboard, to allow the user to play via the keyboard in addition to the mouse.
     document.addEventListener('keydown', (event) => {
-        const keyMap = {
-            'a': 'C4', 's': 'D4', 'd': 'E4', 'f': 'F4', 'g': 'G4', 'h': 'A4', 'j': 'B4', 'k': 'C5',
-            'A': 'C#4', 'w': 'C#4', 'S': 'D#4', 'e': 'D#4', 'F': 'F#4', 't': 'F#4', 'G': 'G#4', 'y': 'G#4', 'z': 'G#4',
-            'H': 'A#4', 'u': 'A#4'
-        };
+        const keyMap = keymaps[current_keymap];
 
         const note = keyMap[event.key];
         if (note) {

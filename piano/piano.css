@@ -3,9 +3,43 @@
 .piano-container {
     display: inline-block;
     background-color: rgb(220, 220, 220);
-    padding: 20px; /* Frame thickness */
+    padding: 40px; /* Frame thickness */
     border-radius: 10px; /* Rounded corners for the frame */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    position: relative; /* Position relative for absolute children */
+}
+
+
+
+/* Dropdown container for selecting keyboard layout */
+.keyboard-layout-dropdown {
+    position: absolute; /* Position the dropdown absolutely within the piano container */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Distance from the right */
+    z-index: 2; /* Ensure it appears above the piano keys */
+}
+
+/* Dropdown styling */
+.keyboard-layout-dropdown select {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    outline: none; /* Remove the default focus outline */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Dropdown hover effect */
+.keyboard-layout-dropdown select:hover {
+    border-color: #888;
+}
+
+/* Dropdown focus effect */
+.keyboard-layout-dropdown select:focus {
+    border-color: #555;
 }
 
 /* Piano keys */
