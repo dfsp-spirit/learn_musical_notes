@@ -1,0 +1,59 @@
+/* piano.css */
+/* Piano container */
+.piano-container {
+    display: inline-block;
+    background-color: rgb(220, 220, 220);
+    padding: 20px; /* Frame thickness */
+    border-radius: 10px; /* Rounded corners for the frame */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+/* Piano keys */
+.piano {
+    display: flex;
+    margin-top: 20px;
+}
+
+/* White keys */
+.key {
+    width: 40px;
+    height: 220px;
+    border: 1px solid #000;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 0 0 8px 8px; /* Rounded corners at the bottom */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+    transition: background-color 0.1s ease; /* Smooth transition for highlighting */
+    user-select: none; /* Prevent text selection */
+    -webkit-user-drag: none; /* Disable dragging in WebKit browsers */
+}
+
+/* Black keys */
+.key.black {
+    width: 25px;
+    height: 140px;
+    background-color: black;
+    margin-left: -15px;
+    margin-right: -15px;
+    z-index: 1;
+    border-radius: 0 0 6px 6px; /* Rounded corners for black keys */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
+}
+
+/* Active key */
+.key.active {
+    background-color: #ccc; /* Highlight color when key is pressed */
+}
+
+.key.black.active {
+    background-color: #555; /* Darker highlight for black keys */
+}
+
+/* Highlighted key */
+.key.highlighted {
+    background-color: #ff4444; /* Red highlight for white keys */
+}
+
+.key.black.highlighted {
+    background-color: #cc0000; /* Darker red highlight for black keys */
+}
