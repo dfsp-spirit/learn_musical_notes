@@ -6,6 +6,13 @@
     <title>Piano Keyboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
     <style>
+        .piano-container {
+            display: inline-block;
+            background-color: rgb(220, 220, 220);
+            padding: 20px; /* Frame thickness */
+            border-radius: 10px; /* Rounded corners for the frame */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        }
         .piano {
             display: flex;
             margin-top: 20px;
@@ -45,24 +52,48 @@
     </style>
 </head>
 <body>
-    <div class="piano">
-        <div class="key" data-note="C4"></div>
-        <div class="key black" data-note="C#4"></div>
-        <div class="key" data-note="D4"></div>
-        <div class="key black" data-note="D#4"></div>
-        <div class="key" data-note="E4"></div>
-        <div class="key" data-note="F4"></div>
-        <div class="key black" data-note="F#4"></div>
-        <div class="key" data-note="G4"></div>
-        <div class="key black" data-note="G#4"></div>
-        <div class="key" data-note="A4"></div>
-        <div class="key black" data-note="A#4"></div>
-        <div class="key" data-note="B4"></div>
+    <div id="pianocontainer" class="piano-container">
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script>
-        const keys = document.querySelectorAll('.key');
+
+        function generateKeys(octaves = ["C4", "C5"], extraHighCAfter = true) {
+            const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            let keys = [];
+
+            octaves.forEach(octave => {
+                const octaveNum = octave.slice(-1);
+                notes.forEach(note => {
+                    const fullNote = `${note}${octaveNum}`;
+                    const keyClass = note.includes("#") ? "key black" : "key";
+                    keys.push(`<div class="${keyClass}" data-note="${fullNote}"></div>`);
+                });
+            });
+
+            if (extraHighCAfter) {
+                const lastOctaveNum = parseInt(octaves[octaves.length - 1].slice(-1)) + 1;
+                const extraC = `<div class="key" data-note="C${lastOctaveNum}"></div>`;
+                keys.push(extraC);
+            }
+
+            return `<div class="piano">\n${keys.join("\n")}\n</div>`;
+        }
+
+        // Usage: Add the piano keys to the "piano_container" div
+        function addPianoToContainer() {
+            // Generate the piano keys
+            const pianoKeys = generateKeys(["C4", "C5"], true);
+
+            // Select the "piano_container" div
+            const pianoContainer = document.getElementById("pianocontainer");
+
+            // Add the generated piano keys to the container
+            pianoContainer.innerHTML = pianoKeys;
+        }
+
+        // Call the function to add the piano to the container
+        addPianoToContainer();
 
         // Create a new sampler to play sounds via Tone.js
         const piano = new Tone.Sampler({
@@ -102,6 +133,8 @@
             piano.triggerAttackRelease(note, "8n"); // Play the note for an 8th note duration
         }
 
+        const keys = document.querySelectorAll('.key');
+
         // Function to highlight a key, e.g., to show when a note is played, or to instruct somebody which key to press
         // @param {String} note - The note to highlight, e.g., "C", "D#", "F#"
         // @param {Number} highlightTime - The time in milliseconds to keep the key highlighted. Set to 0 to keep it highlighted indefinitely.
@@ -125,7 +158,7 @@
             });
         }
 
-        // Function to play a note
+        // Add event listeners to each key
         keys.forEach(key => {
             key.addEventListener('mousedown', () => {
                 isMouseDown = true;
@@ -167,6 +200,7 @@
             lastPlayedNote = null; // Reset the last played note
         });
 
+        // trigger a note when a key is pressed on the computer keyboard. In that case we also highlight the key.
         function triggerNote(note) {
             playNote(note);
             highlightKey(note, 200);
