@@ -28,7 +28,7 @@ function initializePiano(options = {}) {
             keys.push(extraC);
         }
 
-        const keyboardLayoutDropdown = `<div class="keyboard-layout-dropdown" title="Choose your keyboard layout to map the middle row of keys to the C4 octave.">
+        const keyboardLayoutDropdown = `<div class="keyboard-layout-dropdown" title="Choose your keyboard layout to map the middle row of keys to the C4 octave. (Press Shift or the upper row for sharps.)">
         <select id="keyboard-layout">
         </select>
     </div>`;
