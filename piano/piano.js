@@ -3,7 +3,8 @@ function initializePiano(options = {}) {
     let {
         octaves = ["C4", "C5"],
         extraHighCAfter = true,
-        baseUrl = "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/", // ... or to use local files: "./samples/",
+        baseUrl = "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/",
+        //baseUrl = "./resources/samples/",  // If you want to server samples yourself locally. But due to CORS restrictions, this will only work locally if using a web server to serve this page (simply opening the HTML file by double-clicking will not work).
         containerId = "pianocontainer",
         current_keymap = localStorage.getItem("current_keymap") || "EN"  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
     } = options;
