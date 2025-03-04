@@ -147,32 +147,32 @@
         }
 
         document.addEventListener('keydown', (event) => {
-        if (event.key === 'a') {  // Start with the 7 flat notes (a to j)
-            triggerNote('C4');
-        } else if (event.key === "s") {
-            triggerNote('D4');
-        } else if (event.key === 'd') {
-            triggerNote('E4');
-        } else if(event.key === "f") {
-            triggerNote('F4');
-        } else if(event.key === "g") {
-            triggerNote('G4');
-        } else if(event.key === "h") {
-            triggerNote('A4');
-        } else if(event.key === "j") {
-            triggerNote('B4'); // Now the top row (5 sharps)
-        } else if(event.key === "w") {
-            triggerNote('C#4');
-        } else if(event.key === "e") {
-            triggerNote('D#4');
-        } else if(event.key === "t") {
-            triggerNote('F#4');
-        } else if(event.key === "y" || event.key === "z") {    // Allow z for my German keyboard
-            triggerNote('G#4');
-        } else if(event.key === "u") {
-            triggerNote('A#4');
-        }
-});
+            const keyMap = {
+                'a': 'C4', // flats
+                's': 'D4',
+                'd': 'E4',
+                'f': 'F4',
+                'g': 'G4',
+                'h': 'A4',
+                'j': 'B4',
+                'A': 'C#4', // sharps
+                'w': 'C#4',
+                'S': 'D#4',
+                'e': 'D#4',
+                'F': 'F#4',
+                't': 'F#4',
+                'G': 'G#4',
+                'y': 'G#4',
+                'z': 'G#4',  // For AZERTY keyboards
+                'H': 'A#4',
+                'u': 'A#4'
+            };
+
+            const note = keyMap[event.key]; // Get the corresponding note
+            if (note) { // If the key is in the keyMap
+                triggerNote(note); // Play the note
+            }
+        });
 
     </script>
 </body>
