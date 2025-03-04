@@ -26,6 +26,8 @@
             border-radius: 0 0 8px 8px; /* Rounded corners at the bottom */
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
             transition: background-color 0.1s ease; /* Smooth transition for highlighting */
+            user-select: none; /* Prevent text selection */
+            -webkit-user-drag: none; /* Disable dragging in WebKit browsers */
         }
         .key.black {
             width: 25px;
@@ -96,6 +98,8 @@
         addPianoToContainer();
 
         // Create a new sampler to play sounds via Tone.js
+        // The sampler is bright enough to generate sounds for higher octaves (e.g., C5) even if it
+        // only has samples for lower octaves (e.g., C4), so there is no need to add more octaves to the piano.
         const piano = new Tone.Sampler({
             urls: {
                 "C4": "C4.mp3",
