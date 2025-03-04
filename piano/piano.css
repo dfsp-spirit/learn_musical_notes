@@ -24,7 +24,7 @@
     padding: 5px 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: white;
+    background-color: rgb(230, 230, 230);
     font-size: 14px;
     color: #333;
     cursor: pointer;
@@ -40,6 +40,13 @@
 /* Dropdown focus effect */
 .keyboard-layout-dropdown select:focus {
     border-color: #555;
+}
+
+/* Hide dropdown on small screens with touch input */
+@media (max-width: 768px) and (pointer: coarse) {
+    .keyboard-layout-select {
+      display: none;
+    }
 }
 
 /* Piano keys */

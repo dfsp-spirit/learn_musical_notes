@@ -5,7 +5,7 @@ function initializePiano(options = {}) {
         extraHighCAfter = true,
         baseUrl = "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/", // ... or to use local files: "./samples/",
         containerId = "pianocontainer",
-        current_keymap = "en"  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
+        current_keymap = localStorage.getItem("current_keymap") || "EN"  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
     } = options;
 
     // Function to generate piano keys (the HTML structure)
@@ -28,11 +28,8 @@ function initializePiano(options = {}) {
             keys.push(extraC);
         }
 
-        const keyboardLayoutDropdown = `<div class="keyboard-layout-dropdown">
+        const keyboardLayoutDropdown = `<div class="keyboard-layout-dropdown" title="Choose your keyboard layout to map the middle row of keys to the C4 octave.">
         <select id="keyboard-layout">
-            <option value="EN">EN</option>
-            <option value="DE">DE</option>
-            <option value="FR">FR</option>
         </select>
     </div>`;
 
@@ -164,17 +161,17 @@ function initializePiano(options = {}) {
     // Feel free to add more keymaps if needed.
     // Keymaps are stored in a dictionary. The key is the language code (e.g., "en" for English).
     const keymaps = {
-        "en": {  // QWERTY keyboard
+        "EN": {  // QWERTY keyboard
             'a': 'C4', 's': 'D4', 'd': 'E4', 'f': 'F4', 'g': 'G4', 'h': 'A4', 'j': 'B4', 'k': 'C5',
             'A': 'C#4', 'w': 'C#4', 'S': 'D#4', 'e': 'D#4', 'F': 'F#4', 't': 'F#4', 'G': 'G#4', 'y': 'G#4',
             'H': 'A#4', 'u': 'A#4'
         },
-        "de": { // QWERTZ keyboard
+        "DE": { // QWERTZ keyboard
             'a': 'C4', 's': 'D4', 'd': 'E4', 'f': 'F4', 'g': 'G4', 'h': 'A4', 'j': 'B4', 'k': 'C5',
             'A': 'C#4', 'w': 'C#4', 'S': 'D#4', 'e': 'D#4', 'F': 'F#4', 't': 'F#4', 'G': 'G#4', 'z': 'G#4',
             'H': 'A#4', 'u': 'A#4'
         },
-        "fr": { // AZERTY keyboard
+        "FR": { // AZERTY keyboard
             'a': 'C4', 'z': 'D4', 'e': 'E4', 'r': 'F4', 't': 'G4', 'y': 'A4', 'u': 'B4', 'i': 'C5',
             'q': 'C#4', 's': 'D#4', 'd': 'F#4', 'f': 'G#4', 'g': 'A#4'
         }
@@ -207,6 +204,7 @@ function initializePiano(options = {}) {
         // Add an event listener to update the current_keymap when the user selects an option
         selectElement.addEventListener('change', function() {
             current_keymap = selectElement.value;
+            localStorage.setItem("current_keymap", current_keymap); // Save the selected keymap to localStorage
             console.log("Selected keymap:", current_keymap); // This line is just for debugging
         });
     }
