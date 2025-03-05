@@ -99,22 +99,6 @@
     background-color: #cc0000; /* Darker red highlight for black keys */
 }
 
-/* Responsive styles for mobile devices */
-@media (max-width: 768px) {
-    .piano-container {
-        padding: 10px; /* Reduce padding for smaller screens */
-    }
-
-    .key {
-        width: 6vw; /* Use viewport width for responsive sizing */
-        height: 25vh; /* Use viewport height for responsive sizing */
-    }
-
-    .key.black {
-        width: 3vw;
-        height: 18vh;
-    }
-}
 
 @media (max-width: 768px) and (orientation: portrait) {
     .piano-container {
