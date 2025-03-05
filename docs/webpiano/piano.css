@@ -1,4 +1,5 @@
 /* piano.css */
+
 /* Piano container */
 .piano-container {
     display: inline-block;
@@ -8,8 +9,6 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
     position: relative; /* Position relative for absolute children */
 }
-
-
 
 /* Dropdown container for selecting keyboard layout */
 .keyboard-layout-dropdown {
@@ -43,9 +42,10 @@
 }
 
 /* Hide dropdown on small screens with touch input */
-@media (max-width: 768px) and (pointer: coarse) {
-    .keyboard-layout-select {
-      display: none;
+/*@media (max-width: 768px) and (pointer: coarse) {*/
+@media (max-width: 768px) {
+    .keyboard-layout-dropdown select {
+        display: none;
     }
 }
 
@@ -97,4 +97,57 @@
 
 .key.black.highlighted {
     background-color: #cc0000; /* Darker red highlight for black keys */
+}
+
+/* Responsive styles for mobile devices */
+@media (max-width: 768px) {
+    .piano-container {
+        padding: 10px; /* Reduce padding for smaller screens */
+    }
+
+    .key {
+        width: 6vw; /* Use viewport width for responsive sizing */
+        height: 25vh; /* Use viewport height for responsive sizing */
+    }
+
+    .key.black {
+        width: 3vw;
+        height: 18vh;
+    }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+    .piano-container {
+        transform: rotate(90deg);
+        padding: 10px;
+        transform-origin: center;
+        position: fixed;
+        width: 100vw; /* Switch width and height */
+        height: 100vh;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center; /* Center the content */
+        justify-content: center; /* Center the content */
+        overflow: hidden; /* Prevent content from being cut off */
+    }
+
+    .piano {
+        flex-direction: row; /* Stack keys vertically */
+        width: auto;
+        height: 100vw; /* Take full width in rotated mode */
+        width: 100vh; /* Take full width in rotated mode */
+
+    }
+
+    .key {
+        width: 7vw; /* Adjusted key size */
+        height: 20vh; /* Adjusted height */
+    }
+
+    .key.black {
+        width: 4vw;
+        height: 14vh;
+        align-self: flex-start; /* Align black keys to the top */
+    }
 }
