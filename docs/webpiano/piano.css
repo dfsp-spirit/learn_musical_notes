@@ -149,9 +149,11 @@
     }
 
     .key.black {
-        width: 60%; /* Make black keys narrower */
-        height: 50%;
+        width: 50%; /* Make black keys narrower */
+        height: 65%;
         background-color: black;
+        border: 1px solid rgb(160, 160, 160);
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
         z-index: 1;
         border-radius: 0 0 6px 6px;
     }
