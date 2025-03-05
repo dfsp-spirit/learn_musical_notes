@@ -119,35 +119,41 @@
 @media (max-width: 768px) and (orientation: portrait) {
     .piano-container {
         transform: rotate(90deg);
-        padding: 10px;
+        padding: 0;
         transform-origin: center;
         position: fixed;
-        width: 100vw; /* Switch width and height */
-        height: 100vh;
-        top: 0;
-        left: 0;
+        width: 100vh; /* Full screen width in rotated mode */
+        height: 100vw; /* Full screen height in rotated mode */
         display: flex;
-        align-items: center; /* Center the content */
-        justify-content: center; /* Center the content */
-        overflow: hidden; /* Prevent content from being cut off */
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
     }
 
     .piano {
-        flex-direction: row; /* Stack keys vertically */
-        width: auto;
-        height: 100vw; /* Take full width in rotated mode */
-        width: 100vh; /* Take full width in rotated mode */
-
+        display: flex;
+        flex-direction: row; /* Arrange keys side by side */
+        position: relative; /* Needed for absolute black keys */
+        width: 100vw; /* Full rotated width */
+        height: 100vh; /* Full rotated height */
     }
 
     .key {
-        width: 7vw; /* Adjusted key size */
-        height: 20vh; /* Adjusted height */
+        flex: 1; /* Each white key gets equal width */
+        height: 80%; /* Take most of the height */
+        border: 1px solid black;
+        background-color: white;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        position: relative; /* Needed for black keys to be positioned relative to the whole piano */
     }
 
     .key.black {
-        width: 4vw;
-        height: 14vh;
-        align-self: flex-start; /* Align black keys to the top */
+        width: 60%; /* Make black keys narrower */
+        height: 50%;
+        background-color: black;
+        z-index: 1;
+        border-radius: 0 0 6px 6px;
     }
+
 }
