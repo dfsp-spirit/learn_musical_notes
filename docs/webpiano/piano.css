@@ -1,14 +1,6 @@
 /* piano.css */
 
 /* Piano container */
-.piano-container {
-    display: inline-block;
-    background-color: rgb(220, 220, 220);
-    padding: 40px; /* Frame thickness */
-    border-radius: 10px; /* Rounded corners for the frame */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    position: relative; /* Position relative for absolute children */
-}
 
 /* Dropdown container for selecting keyboard layout */
 .keyboard-layout-dropdown {
@@ -48,6 +40,16 @@
         display: none;
     }
 }
+
+.piano-container {
+    display: inline-block;
+    background-color: rgb(220, 220, 220);
+    padding: 40px; /* Frame thickness */
+    border-radius: 10px; /* Rounded corners for the frame */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    position: relative; /* Position relative for absolute children */
+}
+
 
 /* Piano keys */
 .piano {
@@ -99,47 +101,65 @@
     background-color: #cc0000; /* Darker red highlight for black keys */
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
 
 @media (max-width: 768px) and (orientation: portrait) {
-    .piano-container {
-        transform: rotate(90deg);
-        padding: 0;
-        transform-origin: center;
-        position: fixed;
-        width: 100vh; /* Full screen width in rotated mode */
-        height: 100vw; /* Full screen height in rotated mode */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
+    /* Piano container */
+.piano-container {
+    display: inline-block;
+    background-color: rgb(220, 220, 220);
+    border-radius: 5px; /* Rounded corners for the frame */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    position: relative; /* Position relative for absolute children */
+    width: 100vw; /* Make the container width relative to the viewport */
+    height: 100vh; /* Make the container height relative to the viewport */
+}
 
-    .piano {
-        display: flex;
-        flex-direction: row; /* Arrange keys side by side */
-        position: relative; /* Needed for absolute black keys */
-        width: 100vw; /* Full rotated width */
-        height: 100vh; /* Full rotated height */
-    }
+/* Piano keys */
+.piano {
+    display: flex;
+    flex-direction: column; /* Stack keys vertically */
+}
 
-    .key {
-        flex: 1; /* Each white key gets equal width */
-        height: 80%; /* Take most of the height */
-        border: 1px solid black;
-        background-color: white;
-        border-radius: 0 0 8px 8px;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-        position: relative; /* Needed for black keys to be positioned relative to the whole piano */
-    }
+/* White keys */
+.key {
+    width: 80vw; /* Width relative to viewport */
+    height: 6vh; /* Height relative to viewport */
+    border: 1px solid #000;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 0 8px 8px 0; /* Rounded corners at the top for white keys */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+    transition: background-color 0.1s ease; /* Smooth transition for highlighting */
+    user-select: none; /* Prevent text selection */
+    -webkit-user-drag: none; /* Disable dragging in WebKit browsers */
+}
 
-    .key.black {
-        width: 50%; /* Make black keys narrower */
-        height: 65%;
-        background-color: black;
-        border: 1px solid rgb(160, 160, 160);
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
-        z-index: 1;
-        border-radius: 0 0 6px 6px;
-    }
+/* Black keys */
+.key.black {
+    width: 35vw; /* Adjust width relative to the viewport */
+    height: 4vh; /* Adjust height relative to the viewport */
+    background-color: black;
+    margin-top: -4vh; /* Overlap black keys over white keys */
+    margin-bottom: -4vh; /* Overlap black keys over white keys */
+    z-index: 1;
+    border-radius: 0 6px 6px 0; /* Rounded corners at the top for black keys */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
+}
 
+/* Adjust the margin and spacing between keys */
+.key:not(.black) {
+    margin-bottom: 2vh; /* Add spacing between white keys using viewport units */
+}
+
+.key.black {
+    margin-left: 3vw; /* Position black keys to align correctly over white keys */
+}
 }
