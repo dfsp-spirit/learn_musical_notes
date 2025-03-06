@@ -1,6 +1,21 @@
 /* piano.css */
 
-/* Piano container */
+
+/* An example of how you could get a smaller fixed-width piano.
+   You would use it like this on your page that includes the piano:
+
+   <div class="tiny-piano-wrapper">
+        <div id="pianocontainer" class="piano-container">
+            <!-- Piano keys will be added here by JavaScript -->
+        </div>
+   </div>
+
+ */
+.tiny-piano-wrapper {
+    transform: scale(0.6);
+    transform-origin: top left; /* Adjust scaling reference point */
+    width: fit-content; /* Prevents scaling from affecting surrounding layout */
+}
 
 /* Dropdown container for selecting keyboard layout */
 .keyboard-layout-dropdown {
@@ -10,7 +25,7 @@
     z-index: 2; /* Ensure it appears above the piano keys */
 }
 
-/* Dropdown styling */
+/* keyboard layout Dropdown styling */
 .keyboard-layout-dropdown select {
     padding: 5px 10px;
     border: 1px solid #ccc;
@@ -23,17 +38,20 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
-/* Dropdown hover effect */
+/* keyboard layout Dropdown hover effect */
 .keyboard-layout-dropdown select:hover {
     border-color: #888;
 }
 
-/* Dropdown focus effect */
+/* keyboard layout Dropdown focus effect */
 .keyboard-layout-dropdown select:focus {
     border-color: #555;
 }
 
-/* Hide dropdown on small screens with touch input */
+/* Hide keyboard layout dropdown on small screens with touch input.
+ * These devices may not have a keyboard layout to select, and even if
+ * they do, it's unlikely to be used for the piano.
+ */
 /*@media (max-width: 768px) and (pointer: coarse) {*/
 @media (max-width: 768px) {
     .keyboard-layout-dropdown select {
@@ -41,6 +59,13 @@
     }
 }
 
+/* Styling for the piano container
+ *
+ * This is the main container for the piano keys, the piano'S frame if you want. Users need to provide a div with the id "pianocontainer"
+ * and class "piano-container" to use the piano in their HTML. The piano keys will be added to this container by JavaScript.
+ *
+ * E.g., <div id="pianocontainer" class="piano-container"></div>
+ */
 .piano-container {
     display: inline-block;
     background-color: rgb(220, 220, 220);
@@ -51,13 +76,13 @@
 }
 
 
-/* Piano keys */
+/* The piano consists of a list of piano keys. It is inside the piano-container, which can be seen as the frame of the piano. */
 .piano {
     display: flex;
     margin-top: 20px;
 }
 
-/* White keys */
+/* White piano keys */
 .key {
     width: 40px;
     height: 220px;
@@ -71,7 +96,7 @@
     -webkit-user-drag: none; /* Disable dragging in WebKit browsers */
 }
 
-/* Black keys */
+/* Black piano keys */
 .key.black {
     width: 25px;
     height: 140px;
@@ -84,7 +109,7 @@
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Darker shadow for black keys */
 }
 
-/* Active key */
+/* Active key. Active means it is currently pressed. */
 .key.active {
     background-color: #ccc; /* Highlight color when key is pressed */
 }
@@ -93,7 +118,7 @@
     background-color: #555; /* Darker highlight for black keys */
 }
 
-/* Highlighted key */
+/* Highlighted key. Highlighting is used programatically to highlight keys, e.g., to show which key is currently to be pressed, or which keys are pressed when during playback of a song. */
 .key.highlighted {
     background-color: #ff4444; /* Red highlight for white keys */
 }
@@ -102,7 +127,10 @@
     background-color: #cc0000; /* Darker red highlight for black keys */
 }
 
-/* Responsive styles for smaller screens */
+/* Responsive styles for smaller screens
+ * This media query adjusts the layout of the piano for smaller screens, such as tablets and mobile devices.
+ * It is a responsive design that stacks the keys vertically and adjusts their size based on the screen width.
+ */
 @media (max-width: 768px) and (orientation: portrait) {
     /* Ensure html and body take up full height */
 
