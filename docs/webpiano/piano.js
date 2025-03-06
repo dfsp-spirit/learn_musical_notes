@@ -118,6 +118,8 @@ function initializePiano(options = {}) {
 
     // Add event listeners to each key
     keys.forEach(key => {
+
+        // Mouse events
         key.addEventListener('mousedown', () => {
             isMouseDown = true;
             key.classList.add('active');
@@ -146,10 +148,53 @@ function initializePiano(options = {}) {
         key.addEventListener('mouseleave', () => {
             key.classList.remove('active');
         });
+
+        // Touch event listeners
+        key.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // Prevent default touch behavior (e.g., scrolling)
+            isMouseDown = true;
+            key.classList.add('active');
+            const note = key.dataset.note;
+            console.log(note);
+            playNote(note);
+            lastPlayedNote = note;
+        });
+
+        key.addEventListener('touchmove', (event) => {
+            if (isMouseDown) {
+                event.preventDefault(); // Prevent default touch behavior
+                const touch = event.touches[0]; // Get the first touch point
+                const target = document.elementFromPoint(touch.clientX, touch.clientY); // Find the element under the touch point
+                if (target && target.classList.contains('key')) {
+                    target.classList.add('active');
+                    const note = target.dataset.note;
+                    if (note !== lastPlayedNote) {
+                        playNote(note);
+                        lastPlayedNote = note;
+                    }
+                }
+            }
+        });
+
+        key.addEventListener('touchend', () => {
+            isMouseDown = false;
+            lastPlayedNote = null;
+        });
+
+        key.addEventListener('touchcancel', () => {
+            isMouseDown = false;
+            lastPlayedNote = null;
+        });
     });
 
     // Handle mouse up globally. This is required to stop the sound when the mouse is released outside the keys.
     document.addEventListener('mouseup', () => {
+        isMouseDown = false;
+        lastPlayedNote = null;
+    });
+
+    // Handle touch up globally. This is required to stop the sound when the touch is released outside the keys.
+    document.addEventListener('touchend', () => {
         isMouseDown = false;
         lastPlayedNote = null;
     });
