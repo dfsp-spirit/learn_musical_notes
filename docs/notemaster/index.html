@@ -34,6 +34,7 @@
         }
         #score_status { margin: 20px; min-height: 40px; }
         #time_status { margin: 20px; min-height: 40px; }
+        #time_status_last_ten { margin: 20px; min-height: 40px; }
         #buttons { margin-top: 20px; }
         button { margin: 5px; padding: 10px; font-size: 16px; }
         button:disabled {
@@ -84,12 +85,13 @@
     <button id="toggle-timings" title="Toggle display of timings">▶ Timings</button>
     <div id="timings">
         <br>
-        <button id="startOverButton" title="Reset score and timers.">Start over</button>
+        <button id="startOverButton" title="Reset score and timers. You can also refresh the page to start over.">Start over</button>
         <br>
         <h4>Timer</h4>
         <p>Total time elapsed: <span id="timer_overall">0.00</span> seconds</p>
         <p>Note has been displayed for: <span id="timer_current_note">0.00</span> seconds</p>
-        <p title="Need at least 5 successful identifications.">Average time for successful identifications:<span id="time_status" title="Need at least 5 successful identifications.">?</span></p>
+        <p title="Need at least 5 successful identifications.">Average time for all successful identifications:<span id="time_status" title="Need at least 5 successful identifications.">?</span></p>
+        <p title="Need at least 10 successful identifications.">Average time for the last 10 successful identifications:<span id="time_status_last_ten" title="Need at least 10 successful identifications.">?</span></p>
 
     </div>
 
@@ -123,6 +125,8 @@
 
         let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list
         let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];
+
+        console.log("Starting...");
 
         function updateOctaves() {
             selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
@@ -160,7 +164,7 @@
             return notes[Math.floor(Math.random() * notes.length)];
         }
 
-        function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5"]) {
+        function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
@@ -199,7 +203,7 @@
             } else {
                 console.error("Invalid octave");
             }
-            console.log("Transforming note", note, "to", note_out, "in octave", octave, ". Suggested clef:", suggested_clef);
+            //console.log("Transforming note", note, "to", note_out, "in octave", octave, ". Suggested clef:", suggested_clef);
             return [note_out, suggested_clef];
         }
 
@@ -219,7 +223,7 @@
             display_note_start_time = Date.now();
             if (display_note_interval) clearInterval(display_note_interval);
 
-            // Update total time every 100 ms
+            // Update total time every 1 second
             display_note_interval = setInterval(() => {
                 let elapsedSeconds = (Date.now() - overall_start_time) / 1000;
                 document.getElementById("timer_overall").textContent = elapsedSeconds.toFixed(0);
@@ -252,7 +256,7 @@
             }
             num_tries++;
             if (display_note_interval) clearInterval(display_note_interval);
-            document.getElementById("timer_current_note").textContent = "0.00"; // Reset timer
+            document.getElementById("timer_current_note").textContent = "0.0"; // Reset timer
             const score_status = document.getElementById("score_status");
             score_status.textContent = `Score: ${num_correct}/${num_tries}`;
             score_status.title = "Your score. Keep it up!";
@@ -266,7 +270,27 @@
                 time_status.textContent =`${average_time_s.toFixed(1)} s`;
                 time_status.title = "The average time is for correct answers only.";
             }
-            //
+
+            const time_status_last_ten = document.getElementById("time_status_last_ten");
+            if(num_correct >= 10) {
+                const last_ten = correct_identification_times.slice(-10);
+                const average_time = last_ten.reduce((a, b) => a + b, 0) / last_ten.length;
+                const average_time_s_last_ten = average_time / 1000;
+                time_status_last_ten.textContent =`${average_time_s_last_ten.toFixed(1)} s`;
+                time_status_last_ten.title = "The average time for the last 10 correct answers.";
+            }
+
+            // Log the average time for correct clicks to console every 5 correct clicks
+            if(num_correct % 5 === 0) {
+                console.log("Average time for all correct clicks (after ", correct_identification_times.length, " total correct clicks):", time_status.textContent);
+                // Also print the average time over just the last 5 correct clicks
+                if(correct_identification_times.length >= 5) {
+                    const last_five = correct_identification_times.slice(-5);
+                    const average_time_last_five = last_five.reduce((a, b) => a + b, 0) / last_five.length;
+                    console.log("Average time for the last 5 correct clicks (after ", correct_identification_times.length, " total correct clicks):", average_time_last_five / 1000, "s");
+                }
+            }
+
 
             // disable buttons until next question, so user cannot accidently answer twice
             document.querySelectorAll(".answer-btn").forEach(button => {
@@ -291,6 +315,7 @@
             num_correct = 0;
             num_tries = 0;
             correct_identification_times = [];
+            console.log("Starting over...");
             const score_status = document.getElementById("score_status");
             score_status.textContent = `Click the correct note name!`;
             score_status.title = "Go for it!";
@@ -298,6 +323,9 @@
             const time_status = document.getElementById("time_status");
             time_status.textContent = `?`;
             time_status.title = "Need at least 5 successful identifications.";
+            const time_status_last_ten = document.getElementById("time_status_last_ten");
+            time_status_last_ten.textContent = `?`;
+            time_status_last_ten.title = "Need at least 10 successful identifications.";
             renderMusicalNote();
         }
 
