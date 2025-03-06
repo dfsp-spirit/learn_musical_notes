@@ -6,7 +6,8 @@ function initializePiano(options = {}) {
         baseUrl = "https://gleitz.github.io/midi-js-soundfonts/FatBoy/acoustic_grand_piano-mp3/",
         //baseUrl = "./resources/samples/",  // If you want to server samples yourself locally. But due to CORS restrictions, this will only work locally if using a web server to serve this page (simply opening the HTML file by double-clicking will not work).
         containerId = "pianocontainer",
-        current_keymap = localStorage.getItem("current_keymap") || "EN"  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
+        current_keymap = localStorage.getItem("current_keymap") || "EN",  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
+        keypress_active_time_ms = 100
     } = options;
 
     // Function to generate piano keys (the HTML structure)
@@ -80,7 +81,7 @@ function initializePiano(options = {}) {
     let isMouseDown = false; // Track if the mouse button is pressed
     let lastPlayedNote = null; // Track the last played note to avoid repeats
 
-    // Function to play a note
+    // Play a note
     // @param note: the note to play (e.g., "C4")
     function playNote(note) {
         if (Tone.context.state !== 'running') {
@@ -91,7 +92,8 @@ function initializePiano(options = {}) {
 
     const keys = document.querySelectorAll('.key');
 
-    // Function to highlight a key
+    // Highlight a key, e.g., to illustrate which key to play, or for learning notes. This is not what happens if
+    // a key is pressed, see the 'active' class for that.
     // @param note: the note to highlight (e.g., "C4")
     // @param highlightTime: the time in milliseconds to keep the key highlighted. Set to 0 to keep it highlighted indefinitely.
     function highlightKey(note, highlightTime = 0) {
@@ -108,7 +110,7 @@ function initializePiano(options = {}) {
     }
 
     // Remove all highlights from the keys, or from the specific key if a note is provided
-    function removeHighlights(note = null) {
+    function removeHighlighted(note = null) {
         keys.forEach(key => {
             if (note === null || key.dataset.note === note) {
                 key.classList.remove('highlighted');
@@ -116,7 +118,7 @@ function initializePiano(options = {}) {
         });
     }
 
-    // Function to remove the 'active' class from all keys
+    // Remove the 'active' class from all keys.
     function deactivateAllKeys() {
         keys.forEach(key => key.classList.remove('active'));
     }
@@ -160,8 +162,8 @@ function initializePiano(options = {}) {
             isMouseDown = true;
             key.classList.add('active');
             setTimeout(() => {
-                target.classList.remove('active');
-            }, 200);
+                key.classList.remove('active');
+            }, keypress_active_time_ms);
             const note = key.dataset.note;
             console.log(note);
             playNote(note);
@@ -178,7 +180,7 @@ function initializePiano(options = {}) {
                     target.classList.add('active');
                     setTimeout(() => {
                         target.classList.remove('active');
-                    }, 200);
+                    }, keypress_active_time_ms);
                     const note = target.dataset.note;
                     if (note !== lastPlayedNote) {
                         playNote(note);
@@ -190,16 +192,16 @@ function initializePiano(options = {}) {
 
         key.addEventListener('touchend', () => {
             setTimeout(() => {
-                deactivateAllKeys();
-            }, 200);
+                key.classList.remove('active');
+            }, keypress_active_time_ms);
             isMouseDown = false;
             lastPlayedNote = null;
         });
 
         key.addEventListener('touchcancel', () => {
             setTimeout(() => {
-                deactivateAllKeys();
-            }, 200);
+                key.classList.remove('active');
+            }, keypress_active_time_ms);
             isMouseDown = false;
             lastPlayedNote = null;
         });
@@ -215,7 +217,7 @@ function initializePiano(options = {}) {
     document.addEventListener('touchend', () => {
         setTimeout(() => {
             deactivateAllKeys();
-        }, 200);
+        }, keypress_active_time_ms);
         isMouseDown = false;
         lastPlayedNote = null;
     });
@@ -223,7 +225,7 @@ function initializePiano(options = {}) {
     // Trigger a note (used when a key is pressed on the computer keyboard via the key event listener)
     function triggerNote(note) {
         playNote(note);
-        highlightKey(note, 200);
+        highlightKey(note, 200); // When people play using the keyboard, we hightlight the key for better visual feedback.
     }
 
     // Provide several keymaps for different keyboards. For now, we only provide some basic western keymaps.
