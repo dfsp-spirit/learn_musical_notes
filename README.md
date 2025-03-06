@@ -2,8 +2,8 @@
 
 Some fun web-based music tools.
 
-* [WebPiano](./docs/webpiano): Web Piano: An online piano implemented in HTML5, CSS and Tone.js.</a>
-* [NoteMaster](./docs/notemaster/): NoteMaster: A web-based tool to help you to learn reading musical notes</a>
+* [WebPiano](./docs/webpiano): Web Piano: An web-based piano for the browser, implemented in HTML5, CSS and Tone.js. With support for mobile (touch, responsive design). You can play individual keys or swoosh over them with the mouse or with touch input. On devices with a keyboard, you can select between different keyboard layouts (QWERTZ, QWERTY, AZERTY) to play with the keyboard.</a>
+* [NoteMaster](./docs/notemaster/): NoteMaster: A web-based tool to help you to learn reading musical notes. A note is displayed, and you need to click the correct name to identify it. Supports different clefs (treble, bass, alto) and note nomenclature systems (International, German, Solfège). Also allows you to select the range of octaves in which you want to practice.</a>
 
 
 ## Trying the tools now in your browser now
