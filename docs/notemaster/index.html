@@ -158,9 +158,18 @@
             });
         }
 
-        function getRandomNote() {
+        function getRandomNote(lastnote = "") {
             const notes = noteSystems[currentNotation];
-            return notes[Math.floor(Math.random() * notes.length)];
+            if (lastnote === "") {  // Just draw a random note if no last note
+                return notes[Math.floor(Math.random() * notes.length)];
+            } else {
+                // Make sure the next note is different from the last one
+                let newnote = lastnote;
+                while (newnote === lastnote) {
+                    newnote = notes[Math.floor(Math.random() * notes.length)];
+                }
+                return newnote;
+            }
         }
 
         function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
@@ -207,7 +216,7 @@
         }
 
         function renderMusicalNote() {
-            currentNote = getRandomNote();
+            currentNote = getRandomNote(currentNote);
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
             const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, selectedOctaves);
             const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
