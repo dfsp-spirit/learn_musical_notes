@@ -116,6 +116,11 @@ function initializePiano(options = {}) {
         });
     }
 
+    // Function to remove the 'active' class from all keys
+    function deactivateAllKeys() {
+        keys.forEach(key => key.classList.remove('active'));
+    }
+
     // Add event listeners to each key
     keys.forEach(key => {
 
@@ -160,9 +165,11 @@ function initializePiano(options = {}) {
             lastPlayedNote = note;
         });
 
+
         key.addEventListener('touchmove', (event) => {
             if (isMouseDown) {
                 event.preventDefault(); // Prevent default touch behavior
+                deactivateAllKeys(); // Remove 'active' from all keys
                 const touch = event.touches[0]; // Get the first touch point
                 const target = document.elementFromPoint(touch.clientX, touch.clientY); // Find the element under the touch point
                 if (target && target.classList.contains('key')) {
@@ -177,11 +184,13 @@ function initializePiano(options = {}) {
         });
 
         key.addEventListener('touchend', () => {
+            deactivateAllKeys();
             isMouseDown = false;
             lastPlayedNote = null;
         });
 
         key.addEventListener('touchcancel', () => {
+            deactivateAllKeys();
             isMouseDown = false;
             lastPlayedNote = null;
         });
@@ -195,6 +204,7 @@ function initializePiano(options = {}) {
 
     // Handle touch up globally. This is required to stop the sound when the touch is released outside the keys.
     document.addEventListener('touchend', () => {
+        deactivateAllKeys();
         isMouseDown = false;
         lastPlayedNote = null;
     });
