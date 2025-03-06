@@ -159,6 +159,9 @@ function initializePiano(options = {}) {
             event.preventDefault(); // Prevent default touch behavior (e.g., scrolling)
             isMouseDown = true;
             key.classList.add('active');
+            setTimeout(() => {
+                target.classList.remove('active');
+            }, 200);
             const note = key.dataset.note;
             console.log(note);
             playNote(note);
@@ -169,11 +172,13 @@ function initializePiano(options = {}) {
         key.addEventListener('touchmove', (event) => {
             if (isMouseDown) {
                 event.preventDefault(); // Prevent default touch behavior
-                deactivateAllKeys(); // Remove 'active' from all keys
                 const touch = event.touches[0]; // Get the first touch point
                 const target = document.elementFromPoint(touch.clientX, touch.clientY); // Find the element under the touch point
                 if (target && target.classList.contains('key')) {
                     target.classList.add('active');
+                    setTimeout(() => {
+                        target.classList.remove('active');
+                    }, 200);
                     const note = target.dataset.note;
                     if (note !== lastPlayedNote) {
                         playNote(note);
@@ -184,13 +189,17 @@ function initializePiano(options = {}) {
         });
 
         key.addEventListener('touchend', () => {
-            deactivateAllKeys();
+            setTimeout(() => {
+                deactivateAllKeys();
+            }, 200);
             isMouseDown = false;
             lastPlayedNote = null;
         });
 
         key.addEventListener('touchcancel', () => {
-            deactivateAllKeys();
+            setTimeout(() => {
+                deactivateAllKeys();
+            }, 200);
             isMouseDown = false;
             lastPlayedNote = null;
         });
@@ -204,7 +213,9 @@ function initializePiano(options = {}) {
 
     // Handle touch up globally. This is required to stop the sound when the touch is released outside the keys.
     document.addEventListener('touchend', () => {
-        deactivateAllKeys();
+        setTimeout(() => {
+            deactivateAllKeys();
+        }, 200);
         isMouseDown = false;
         lastPlayedNote = null;
     });
