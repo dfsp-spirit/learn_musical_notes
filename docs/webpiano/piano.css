@@ -109,3 +109,70 @@ html, body {
     overflow: hidden; /* Prevent scrollbars */
 }
 
+
+
+@media (max-width: 768px) and (orientation: portrait) {
+
+    /* Piano container */
+.piano-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(220, 220, 220);
+    position: relative;
+}
+
+/* Piano keys (vertical layout) */
+.piano {
+    display: flex;
+    flex-direction: column; /* Stack keys vertically */
+    align-items: flex-end;
+}
+
+/* White keys */
+.key {
+    width: 80vw; /* Responsive width based on viewport width */
+    height: 4vh; /* Responsive height based on viewport height */
+    border: 1px solid #000;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 8px 0 0 8px; /* Rounded corners at the top */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.1s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+    margin-bottom: 1vh; /* Responsive space between keys */
+}
+
+/* Black keys */
+.key.black {
+    width: 60vw; /* Slightly narrower than white keys */
+    height: 3vh; /* Shorter height for black keys */
+    background-color: black;
+    margin-left: 0; /* Reset horizontal margin */
+    margin-right: 0; /* Reset horizontal margin */
+    margin-top: -2vh; /* Overlap with white keys */
+    margin-bottom: -2vh; /* Overlap with white keys */
+    z-index: 1;
+    border-radius: 6px 0 0 6px; /* Rounded corners at the top */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Active key */
+.key.active {
+    background-color: #ccc; /* Highlight color when key is pressed */
+}
+
+.key.black.active {
+    background-color: #555; /* Darker highlight for black keys */
+}
+
+/* Highlighted key */
+.key.highlighted {
+    background-color: #ff4444; /* Red highlight for white keys */
+}
+
+.key.black.highlighted {
+    background-color: #cc0000; /* Darker red highlight for black keys */
+}
+}
