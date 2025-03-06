@@ -20,7 +20,20 @@
             border: none;
             font-size: 16px;
         }
-        #status { margin: 20px; min-height: 40px; }
+        #timings {
+            display: none; /* Hidden by default */
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        #toggle-timings {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
+        #score_status { margin: 20px; min-height: 40px; }
+        #time_status { margin: 20px; min-height: 40px; }
         #buttons { margin-top: 20px; }
         button { margin: 5px; padding: 10px; font-size: 16px; }
         button:disabled {
@@ -35,9 +48,8 @@
 <body>
     <h1>NoteMaster: Identify the Musical Note</h1>
 
-    <button id="toggle-settings" title="Toggle display of settings and timer">▶ Settings & Timer</button>
+    <button id="toggle-settings" title="Toggle display of settings">▶ Settings</button>
     <div id="settings">
-        <h4>Settings</h4>
         <div id="setting_notation" title="The note nomenclature system">Nomenclature:
             <label>
                 <input type="radio" name="notation" value="international" checked> International
@@ -67,14 +79,21 @@
                 <input type="radio" name="clef" value="alto"> Alto
             </label>
         </div>
+
+    </div>
+    <button id="toggle-timings" title="Toggle display of timings">▶ Timings</button>
+    <div id="timings">
         <br>
         <button id="startOverButton" title="Reset score and timers.">Start over</button>
         <br>
         <h4>Timer</h4>
-        <p>Note has been displayed for: <span id="timer">0.00</span> seconds</p>
+        <p>Total time elapsed: <span id="timer_overall">0.00</span> seconds</p>
+        <p>Note has been displayed for: <span id="timer_current_note">0.00</span> seconds</p>
+        <p title="Need at least 5 successful identifications.">Average time for successful identifications:<span id="time_status" title="Need at least 5 successful identifications.">?</span></p>
+
     </div>
 
-    <div id="status" title="Go for it!">Click the correct note name!
+    <div id="score_status" title="Go for it!">Click the correct note name!
     </div>
 
 
@@ -92,7 +111,8 @@
         let num_correct = 0;
         let num_tries = 0;
 
-        let display_note_start_time;
+        let overall_start_time;  // when the quiz started
+        let display_note_start_time;  // when the current note was displayed
         let display_note_interval = null;
         let correct_identification_times = [];
 
@@ -191,13 +211,24 @@
             const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
 
+            // set overall time if not set yet
+            if (!overall_start_time) {
+                overall_start_time = Date.now();
+            }
+
             display_note_start_time = Date.now();
             if (display_note_interval) clearInterval(display_note_interval);
 
-            // Update time every 100 ms
+            // Update total time every 100 ms
+            display_note_interval = setInterval(() => {
+                let elapsedSeconds = (Date.now() - overall_start_time) / 1000;
+                document.getElementById("timer_overall").textContent = elapsedSeconds.toFixed(0);
+            }, 1000);
+
+            // Update current note time every 100 ms
             display_note_interval = setInterval(() => {
                 let elapsedSeconds = (Date.now() - display_note_start_time) / 1000;
-                document.getElementById("timer").textContent = elapsedSeconds.toFixed(1);
+                document.getElementById("timer_current_note").textContent = elapsedSeconds.toFixed(1);
             }, 100);
 
             // Remove the correct/false message from previous question
@@ -221,17 +252,19 @@
             }
             num_tries++;
             if (display_note_interval) clearInterval(display_note_interval);
-            document.getElementById("timer").textContent = "0.00"; // Reset timer
-            const status = document.getElementById("status");
-            status.textContent = `Score: ${num_correct}/${num_tries}`;
-            status.title = "Your score. Keep it up!";
+            document.getElementById("timer_current_note").textContent = "0.00"; // Reset timer
+            const score_status = document.getElementById("score_status");
+            score_status.textContent = `Score: ${num_correct}/${num_tries}`;
+            score_status.title = "Your score. Keep it up!";
+
+            const time_status = document.getElementById("time_status");
 
             // Show average time for correct clicks
             if(num_correct >= 5) {
                 const average_time = correct_identification_times.reduce((a, b) => a + b, 0) / correct_identification_times.length;
                 const average_time_s = average_time / 1000;
-                status.textContent += ` | Average time: ${average_time_s.toFixed(1)} s`;
-                status.title = "Your score. Keep it up! The average time is for correct answers only.";
+                time_status.textContent =`${average_time_s.toFixed(1)} s`;
+                time_status.title = "The average time is for correct answers only.";
             }
             //
 
@@ -258,9 +291,13 @@
             num_correct = 0;
             num_tries = 0;
             correct_identification_times = [];
-            const status = document.getElementById("status");
-            status.textContent = `Click the correct note name!`;
-            status.title = "Go for it!";
+            const score_status = document.getElementById("score_status");
+            score_status.textContent = `Click the correct note name!`;
+            score_status.title = "Go for it!";
+            overall_start_time = Date.now();
+            const time_status = document.getElementById("time_status");
+            time_status.textContent = `?`;
+            time_status.title = "Need at least 5 successful identifications.";
             renderMusicalNote();
         }
 
@@ -289,10 +326,23 @@
 
             if (window.getComputedStyle(settingsDiv).display === "none") {
                 settingsDiv.style.display = "block";
-                button.textContent = "▼ Settings & Timer"; // Change arrow down
+                button.textContent = "▼ Settings"; // Change arrow down
             } else {
                 settingsDiv.style.display = "none";
-                button.textContent = "▶ Settings & Timer"; // Change arrow right
+                button.textContent = "▶ Settings"; // Change arrow right
+            }
+        });
+
+        document.getElementById("toggle-timings").addEventListener("click", function() {
+            const timingsDiv = document.getElementById("timings");
+            const button = this;
+
+            if (window.getComputedStyle(timingsDiv).display === "none") {
+                timingsDiv.style.display = "block";
+                button.textContent = "▼ Timings"; // Change arrow down
+            } else {
+                timingsDiv.style.display = "none";
+                button.textContent = "▶ Timings"; // Change arrow right
             }
         });
 
