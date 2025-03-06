@@ -18,14 +18,14 @@ function initializePiano(options = {}) {
             const octaveNum = octave.slice(-1);
             notes.forEach(note => {
                 const fullNote = `${note}${octaveNum}`;
-                const keyClass = note.includes("#") ? "key black" : "key";
+                const keyClass = note.includes("#") ? "key black" : "key white";
                 keys.push(`<div class="${keyClass}" data-note="${fullNote}"></div>`);
             });
         });
 
         if (extraHighCAfter) {
             const lastOctaveNum = parseInt(octaves[octaves.length - 1].slice(-1)) + 1;
-            const extraC = `<div class="key" data-note="C${lastOctaveNum}"></div>`;
+            const extraC = `<div class="key white" data-note="C${lastOctaveNum}"></div>`;
             keys.push(extraC);
         }
 
@@ -107,10 +107,12 @@ function initializePiano(options = {}) {
         });
     }
 
-    // Function to remove all highlights from the keys.
-    function removeHighlights() {
+    // Remove all highlights from the keys, or from the specific key if a note is provided
+    function removeHighlights(note = null) {
         keys.forEach(key => {
-            key.classList.remove('highlighted');
+            if (note === null || key.dataset.note === note) {
+                key.classList.remove('highlighted');
+            }
         });
     }
 
