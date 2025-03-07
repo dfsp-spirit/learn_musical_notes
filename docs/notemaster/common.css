@@ -1,0 +1,74 @@
+
+/* -------------------------------------- Menu  -------------------------------------- */
+
+#topMenuList {
+    display: flex;                /* Display items in a row */
+    align-items: center;          /* Vertically center the items */
+    justify-content: center;      /* Horizontally center the items */
+    margin: 0 auto;               /* Ensure the menu is centered in its parent */
+}
+
+.nav-link {
+    margin-right: 10px;           /* Space between items */
+    text-decoration: none;        /* Remove underline */
+    color: #000;                  /* Set initial color for the links */
+    transition: color 0.3s ease;  /* Smooth color transition */
+}
+
+.nav-link:hover {
+    color: #555;                  /* Slightly change text color on hover */
+}
+
+.nav-link.active {
+    color: #007bff;               /* Change text color for active link */
+}
+
+.separator {
+    margin-left: 10px;            /* Space between items and separator */
+    margin-right: 10px;           /* Space between separator and next item */
+    color: #000;                  /* Set color for separator */
+}
+
+
+/* -------------------------------------------------------------------------------------- */
+
+body { font-family: Arial, sans-serif; text-align: center; }
+        #settings {
+            display: none; /* Hidden by default */
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        #toggle-settings {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
+        #timings {
+            display: none; /* Hidden by default */
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        #toggle-timings {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+        }
+        #score_wrapper { margin: 20px; min-height: 40px; }
+        #score_status { color: rgb(0, 0, 0 ) }
+        #score_status_percent { color:rgb(160, 160, 160) }
+        #time_status { margin: 20px; min-height: 40px; }
+        #time_status_last_ten { margin: 20px; min-height: 40px; }
+        #buttons { margin-top: 20px; }
+        button { margin: 5px; padding: 10px; font-size: 16px; }
+        button:disabled {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        #notation { margin: 0 auto; width: 200px; min-height: 80px; }
+

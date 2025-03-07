@@ -6,49 +6,15 @@
     <title>NoteMaster: Musical Quiz</title>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.0.0/abcjs-basic-min.js"></script> -->
     <script src="./abcjs-basic-min.js"></script>
+    <script src="./common.js"></script> <!-- Common functions for all quizzes, like menu. -->
+    <link rel="stylesheet" href="./common.css">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #settings {
-            display: none; /* Hidden by default */
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-        #toggle-settings {
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 16px;
-        }
-        #timings {
-            display: none; /* Hidden by default */
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-        #toggle-timings {
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 16px;
-        }
-        #score_wrapper { margin: 20px; min-height: 40px; }
-        #score_status { color: rgb(0, 0, 0 ) }
-        #score_status_percent { color:rgb(160, 160, 160) }
-        #time_status { margin: 20px; min-height: 40px; }
-        #time_status_last_ten { margin: 20px; min-height: 40px; }
-        #buttons { margin-top: 20px; }
-        button { margin: 5px; padding: 10px; font-size: 16px; }
-        button:disabled {
-            background-color: gray;
-            color: white;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        #notation { margin: 0 auto; width: 200px; min-height: 80px; }
+
     </style>
 </head>
 <body>
+    <div id="topMenu"></div>
+
     <h1>NoteMaster: Identify the Musical Note</h1>
 
     <button id="toggle-settings" title="Toggle display of settings">▶ Settings</button>
@@ -131,6 +97,8 @@
         let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // List of all octaves.
         let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // The currently selected octaves, i.e., the ones where random notes are drawn from.
 
+        generateTopMenu(); // Generate the top menu with links to other quizzes.
+
         console.log("Starting...");
 
         // Update the current octaves. Called when user changes the checkboxes in the octave settings menu.
@@ -170,22 +138,22 @@
         // This draws a general note like 'C' or 'F', not a specific note in SPN like 'C4' or 'F2'. The octave is added later.
         // This function artificially makes it less likely to draw a note that is directly adjacent to the last note if lastnote is provided.
         function getRandomNote(lastnote = "") {
-            const notes = noteSystems[currentNotation];
+            const available_notes = noteSystems[currentNotation];
             if (lastnote === "") {  // Just draw a random note if no last note is known
-                return notes[Math.floor(Math.random() * notes.length)];
+                return available_notes[Math.floor(Math.random() * available_notes.length)];
             } else {
                 // Use knowledge on last note to:
                 //   * prevent the same note from being drawn again
                 //   * make it less likely (but not impossible) to draw a note that is directly adjacent to the last note
 
                 if (Math.random() < 0.05) { // Limit chance to draw adjacent note to 5%. Does never draw identical note.
-                    const lastnoteIndex = notes.indexOf(lastnote);
-                    const adjacentNotes = [notes[(lastnoteIndex + 1) % notes.length], notes[(lastnoteIndex - 1 + notes.length) % notes.length]];
+                    const lastnoteIndex = available_notes.indexOf(lastnote);
+                    const adjacentNotes = [available_notes[(lastnoteIndex + 1) % available_notes.length], available_notes[(lastnoteIndex - 1 + available_notes.length) % available_notes.length]];
                     newnote = adjacentNotes[Math.floor(Math.random() * 2)];
                 } else {
                     // The vast majority of the time, draw only from the notes that are not adjacent to the last note (and not identical to it).
-                    const lastnoteIndex = notes.indexOf(lastnote);
-                    const nonAdjacentNotes = notes.filter(note => note !== notes[(lastnoteIndex + 1) % notes.length] && note !== notes[(lastnoteIndex - 1 + notes.length) % notes.length] && note !== lastnote);
+                    const lastnoteIndex = available_notes.indexOf(lastnote);
+                    const nonAdjacentNotes = available_notes.filter(note => note !== available_notes[(lastnoteIndex + 1) % available_notes.length] && note !== available_notes[(lastnoteIndex - 1 + available_notes.length) % available_notes.length] && note !== lastnote);
                     newnote = nonAdjacentNotes[Math.floor(Math.random() * nonAdjacentNotes.length)];
                 }
 
@@ -198,10 +166,10 @@
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
-        // Convert a note name like 'F' to a full note name in scientific pitch notation (SPN) with an octave, like 'F4'.
+        // Convert a note name like 'F' to a full note name in abc.js notation, with an octave identified by case and a suffix character, like 'F,' 'f', or "f'".
         // @param noteName: The note name, like `'F'`.
         // @param octave: The octave to use, like `'C4'` (or simply `"4"` or `4` if you prefer). You can also use the string `'random'` to select a random octave. If octave is an array of strings, it is treated as a list of allowed octaves to choose from.
-        // @return: A tuple with the note name in SPN and the suggested clef to use. The clef is either `'treble'` or `'bass'`.
+        // @return: A tuple with the note name in abc.js syntax and the suggested clef to use. The clef is either `'treble'` or `'bass'`. Both return values are usable as input fir abc.js.
         function toOctaveSPN(noteName, octave="C4") {
 
             if(octave === "random") {
@@ -219,19 +187,19 @@
             if(octave === "C1" || octave === "1" || octave === 1) {
                 note_out = note + ",,";
                 suggested_clef = "bass";
-            } else if (octave === "C2") {
+            } else if (octave === "C2" || octave === "2" || octave === 2) {
                 note_out = note + ",";
                 suggested_clef = "bass";
-            } else if (octave === "C3") {
+            } else if (octave === "C3" || octave === "3" || octave === 3) {
                 note_out = note;
                 suggested_clef = "treble";
-            } else if (octave === "C4") {
+            } else if (octave === "C4" || octave === "4" || octave === 4) {
                 note_out = note.toLowerCase();
                 suggested_clef = "treble";
-            } else if (octave === "C5") {
+            } else if (octave === "C5" || octave === "5" || octave === 5) {
                 note_out = note.toLowerCase() + "'";
                 suggested_clef = "treble";
-            } else if (octave === "C6") {
+            } else if (octave === "C6" || octave === "6" || octave === 6) {
                 note_out = note.toLowerCase() + "''";
                 suggested_clef = "treble";
             } else {
