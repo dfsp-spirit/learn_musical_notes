@@ -32,7 +32,9 @@
             border: none;
             font-size: 16px;
         }
-        #score_status { margin: 20px; min-height: 40px; }
+        #score_wrapper { margin: 20px; min-height: 40px; }
+        #score_status { color: rgb(0, 0, 0 ) }
+        #score_status_percent { color:rgb(160, 160, 160) }
         #time_status { margin: 20px; min-height: 40px; }
         #time_status_last_ten { margin: 20px; min-height: 40px; }
         #buttons { margin-top: 20px; }
@@ -94,7 +96,9 @@
 
     </div>
 
-    <div id="score_status" title="Go for it!">Click the correct note name!
+    <div id="score_wrapper" title="Your score.">
+        <span id="score_status" title="Go for it!">Click the correct note name!</span>
+        <span id="score_status_percent" title="Percentage of correct answers"></span>
     </div>
 
 
@@ -293,7 +297,10 @@
             if (display_note_interval) clearInterval(display_note_interval);
             document.getElementById("timer_current_note").textContent = "0.0"; // Reset timer
             const score_status = document.getElementById("score_status");
-            score_status.textContent = `Score: ${num_correct}/${num_tries}`;
+            score_status.textContent = `Score: ${num_correct} / ${num_tries}`;
+            const score_status_percent = document.getElementById("score_status_percent");
+            // Add score percent correct after current textContent
+            score_status_percent.textContent = `(${(num_correct / num_tries * 100).toFixed(0)}%)`;
             score_status.title = "Your score. Keep it up!";
 
             const time_status = document.getElementById("time_status");
@@ -357,6 +364,8 @@
             const score_status = document.getElementById("score_status");
             score_status.textContent = `Click the correct note name!`;
             score_status.title = "Go for it!";
+            const score_status_percent = document.getElementById("score_status_percent");
+            score_status_percent.textContent = "";
             overall_start_time = Date.now();
             const time_status = document.getElementById("time_status");
             time_status.textContent = `?`;
