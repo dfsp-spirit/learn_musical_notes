@@ -124,8 +124,8 @@
 
         let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use
 
-        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list of octaves
-        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // Initial selected octaves (defaults)
+        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // List of all octaves.
+        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // The currently selected octaves, i.e., the ones where random notes are drawn from.
 
         console.log("Starting...");
 
@@ -144,7 +144,7 @@
             renderMusicalNote();
         }
 
-        // Dynamically generate checkboxes for selecting octaves
+        // Dynamically generate checkboxes for selecting octaves from `availableOctaves`.
         function generateIncludedOctavesCheckboxes() {
             const container = document.getElementById("octave-settings");
             container.innerHTML = "Octaves (SPN):";
@@ -163,16 +163,28 @@
         }
 
         // Draw a random note from the current note system. If lastnote is provided, make sure the new note is different.
+        // This draws a general note like 'C' or 'F', not a specific note in SPN like 'C4' or 'F2'. The octave is added later.
+        // This function artificially makes it less likely to draw a note that is directly adjacent to the last note if lastnote is provided.
         function getRandomNote(lastnote = "") {
             const notes = noteSystems[currentNotation];
-            if (lastnote === "") {  // Just draw a random note if no last note
+            if (lastnote === "") {  // Just draw a random note if no last note is known
                 return notes[Math.floor(Math.random() * notes.length)];
             } else {
-                // Make sure the next note is different from the last one
-                let newnote = lastnote;
-                while (newnote === lastnote) {
-                    newnote = notes[Math.floor(Math.random() * notes.length)];
+                // Use knowledge on last note to:
+                //   * prevent the same note from being drawn again
+                //   * make it less likely (but not impossible) to draw a note that is directly adjacent to the last note
+
+                if (Math.random() < 0.05) { // Limit chance to draw adjacent note to 5%. Does never draw identical note.
+                    const lastnoteIndex = notes.indexOf(lastnote);
+                    const adjacentNotes = [notes[(lastnoteIndex + 1) % notes.length], notes[(lastnoteIndex - 1 + notes.length) % notes.length]];
+                    newnote = adjacentNotes[Math.floor(Math.random() * 2)];
+                } else {
+                    // The vast majority of the time, draw only from the notes that are not adjacent to the last note (and not identical to it).
+                    const lastnoteIndex = notes.indexOf(lastnote);
+                    const nonAdjacentNotes = notes.filter(note => note !== notes[(lastnoteIndex + 1) % notes.length] && note !== notes[(lastnoteIndex - 1 + notes.length) % notes.length] && note !== lastnote);
+                    newnote = nonAdjacentNotes[Math.floor(Math.random() * nonAdjacentNotes.length)];
                 }
+
                 return newnote;
             }
         }
@@ -182,9 +194,10 @@
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
-        // Convert a note name like 'C' to a full note name in scientific pitch notation (SPN) with an octave, like 'C4'.
-        // If octave is "random", a random octave is selected from the list of allowed octaves.
-        // Returns a tuple with the note name in SPN and the suggested clef to use.
+        // Convert a note name like 'F' to a full note name in scientific pitch notation (SPN) with an octave, like 'F4'.
+        // @param noteName: The note name, like `'F'`.
+        // @param octave: The octave to use, like `'C4'` (or simply `"4"` or `4` if you prefer). You can also use the string `'random'` to select a random octave. If octave is an array of strings, it is treated as a list of allowed octaves to choose from.
+        // @return: A tuple with the note name in SPN and the suggested clef to use. The clef is either `'treble'` or `'bass'`.
         function toOctaveSPN(noteName, octave="C4") {
 
             if(octave === "random") {
@@ -199,7 +212,7 @@
             const note = noteName.toUpperCase();
             let note_out = note;
             let suggested_clef = "treble";
-            if(octave === "C1") {
+            if(octave === "C1" || octave === "1" || octave === 1) {
                 note_out = note + ",,";
                 suggested_clef = "bass";
             } else if (octave === "C2") {
@@ -266,7 +279,9 @@
         // Check if the answer is correct and update the score and various timings and statistics.
         function checkAnswer(note) {
             const result = document.getElementById("result");
+            let isCorrect = false;
             if (note === currentNote) {
+                isCorrect = true;
                 result.textContent = "✅ Correct, it's " + note + "!";
                 num_correct++;
                 const time_to_answer = Date.now() - display_note_start_time;
@@ -316,7 +331,8 @@
             document.querySelectorAll(".answer-btn").forEach(button => {
                 button.disabled = true;
             });
-            setTimeout(renderMusicalNote, 1000);
+            const timeout = isCorrect ? 1000 : 2000;
+            setTimeout(renderMusicalNote, timeout);
         }
 
         // Create answer buttons for the current note system.
