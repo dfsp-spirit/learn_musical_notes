@@ -103,30 +103,33 @@
     <p id="result"></p>
 
     <script>
+
+        // note nomenclature systems
         const noteSystems = {
             international: ["C", "D", "E", "F", "G", "A", "B"],
             german: ["C", "D", "E", "F", "G", "A", "H"],
             solfege: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"]
         };
 
-        let num_correct = 0;
-        let num_tries = 0;
+        let num_correct = 0; // number of correct answers so far in the quiz
+        let num_tries = 0;   // number of total tries so far in the quiz
 
         let overall_start_time;  // when the quiz started
         let display_note_start_time;  // when the current note was displayed
-        let display_note_interval = null;
-        let correct_identification_times = [];
+        let display_note_interval = null; // interval for updating the current note time
+        let correct_identification_times = []; // list of times for correct identifications
 
         let currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";
-        let currentNote = "";
+        let currentNote = ""; // current note being displayed
 
-        let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";
+        let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use
 
-        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list
-        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];
+        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // Initial list of octaves
+        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // Initial selected octaves (defaults)
 
         console.log("Starting...");
 
+        // Update the current octaves. Called when user changes the checkboxes in the octave settings menu.
         function updateOctaves() {
             selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
                                 .map(checkbox => checkbox.value);
@@ -141,6 +144,7 @@
             renderMusicalNote();
         }
 
+        // Dynamically generate checkboxes for selecting octaves
         function generateIncludedOctavesCheckboxes() {
             const container = document.getElementById("octave-settings");
             container.innerHTML = "Octaves (SPN):";
@@ -158,6 +162,7 @@
             });
         }
 
+        // Draw a random note from the current note system. If lastnote is provided, make sure the new note is different.
         function getRandomNote(lastnote = "") {
             const notes = noteSystems[currentNotation];
             if (lastnote === "") {  // Just draw a random note if no last note
@@ -172,10 +177,14 @@
             }
         }
 
+        // Draw a random octave from the list of octaves provided. If no list is provided, use the default list.
         function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
+        // Convert a note name like 'C' to a full note name in scientific pitch notation (SPN) with an octave, like 'C4'.
+        // If octave is "random", a random octave is selected from the list of allowed octaves.
+        // Returns a tuple with the note name in SPN and the suggested clef to use.
         function toOctaveSPN(noteName, octave="C4") {
 
             if(octave === "random") {
@@ -215,6 +224,7 @@
             return [note_out, suggested_clef];
         }
 
+        // Render a new musical note on the screen and start the timer.
         function renderMusicalNote() {
             currentNote = getRandomNote(currentNote);
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
@@ -246,12 +256,14 @@
             // Remove the correct/false message from previous question
             const result = document.getElementById("result");
             result.textContent = "";
-            // Re-enable answer buttons
+
+            // Re-enable answer buttons. They were disabled after the last question in the checkAnswer function.
             document.querySelectorAll(".answer-btn").forEach(button => {
                 button.disabled = false;
             });
         }
 
+        // Check if the answer is correct and update the score and various timings and statistics.
         function checkAnswer(note) {
             const result = document.getElementById("result");
             if (note === currentNote) {
@@ -307,6 +319,7 @@
             setTimeout(renderMusicalNote, 1000);
         }
 
+        // Create answer buttons for the current note system.
         function createAnswerButtons() {
             const container = document.getElementById("buttons");
             container.innerHTML = "";
@@ -319,6 +332,7 @@
             });
         }
 
+        // Start the quiz. Resets score and all timers and statistics.
         function startOver() {
             num_correct = 0;
             num_tries = 0;
@@ -337,9 +351,10 @@
             renderMusicalNote();
         }
 
+        // Attach event listener for startover button
         document.getElementById("startOverButton").addEventListener("click", startOver);
 
-
+        // Attach event listeners for note notation settings
         document.querySelectorAll("input[name='notation']").forEach(radio => {
             radio.addEventListener("change", (event) => {
                 currentNotation = event.target.value;
@@ -348,6 +363,7 @@
             });
         });
 
+        // Attach event listeners for clef settings
         document.querySelectorAll("input[name='clef']").forEach(radio => {
             radio.addEventListener("change", (event) => {
                 currentClef = event.target.value;
@@ -356,6 +372,7 @@
             });
         });
 
+        // Attach event listeners for toggling settings visible vs hidden
         document.getElementById("toggle-settings").addEventListener("click", function() {
             const settingsDiv = document.getElementById("settings");
             const button = this;
@@ -369,6 +386,7 @@
             }
         });
 
+        // Attach event listeners for toggling timings visible vs hidden
         document.getElementById("toggle-timings").addEventListener("click", function() {
             const timingsDiv = document.getElementById("timings");
             const button = this;
