@@ -7,8 +7,22 @@ function initializePiano(options = {}) {
         //baseUrl = "./resources/samples/",  // If you want to server samples yourself locally. But due to CORS restrictions, this will only work locally if using a web server to serve this page (simply opening the HTML file by double-clicking will not work).
         containerId = "pianocontainer",
         current_keymap = localStorage.getItem("current_keymap") || "EN",  // Default keymap is English, try "en", "de", "fr" for QWERTY, QWERTZ, AZERTY keyboards
-        keypress_active_time_ms = 100
+        keypress_active_time_ms = 100,
+        use_local_samples = true // Change to false to use online MP3s
     } = options;
+
+
+    // Load the sounds.js file if using local samples
+    function loadScript(src, callback, errorCallback) {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = callback;
+        script.onerror = () => {
+            console.error(`Failed to load script file '${src}'.`);
+            if (errorCallback) errorCallback();
+        };
+        document.head.appendChild(script);
+    }
 
     // Function to generate piano keys (the HTML structure)
     function generateKeys(octaves, extraHighCAfter) {
@@ -47,11 +61,115 @@ function initializePiano(options = {}) {
     }
     pianoContainer.innerHTML = generateKeys(octaves, extraHighCAfter);
 
+    // Convert a sharp note to a flat note (e.g., "C#4" to "Db4")
+    function sharpToFlat(spnNote) {
+        const SHARP_TO_FLAT = {
+            "C#": "Db",
+            "D#": "Eb",
+            "F#": "Gb",
+            "G#": "Ab",
+            "A#": "Bb"
+        };
+
+        // Extract pitch and octave (e.g., "C#4" → "C#" + "4")
+        const match = spnNote.match(/^([A-G]#)(\d+)$/);
+
+        if (match) {
+            const [, sharpNote, octave] = match;
+            return SHARP_TO_FLAT[sharpNote] + octave;
+        }
+
+        return spnNote; // Return unchanged if it's not a sharp note
+    }
+
+    function base64ToBlobUrl(base64) {
+        if (!base64) {
+            console.error("Invalid Base64 string:", base64);
+            return null;
+        }
+        // Remove the "data:audio/mp3;base64," prefix if present
+        const cleanBase64 = base64.split(",").pop();
+
+        try {
+            const binary = atob(cleanBase64); // Decode Base64 string
+            const array = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                array[i] = binary.charCodeAt(i);
+            }
+            const blob = new Blob([array], { type: "audio/mp3" });
+            return URL.createObjectURL(blob);
+        } catch (error) {
+            console.error("Base64 decoding error:", error);
+            return null;
+        }
+    }
+
+    // Create a piano using Tone.js.
+    // Depending on the `use_local_samples` variable, the piano will use either local samples from the file sounds.js or online samples from Github.com.
+    function getSampledPiano(use_local_samples = true) {
+        if(use_local_samples) {
+            // If offline, use local samples from `sounds.js` into variable `sounds`.
+
+            loadScript(
+                "sounds.js",
+                () => {
+                    console.log("Loaded local sounds.js");
+
+                    const NOTES = ["C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4"];
+
+                    const samples = NOTES.map(note => [note, base64ToBlobUrl(sounds[note])]);
+
+                    const sampler = new Tone.Sampler({
+                        urls : samples, // Now sounds is defined!
+                        baseUrl: baseUrl,
+                        onload: () => {
+                            console.log("Piano loaded!");
+                        }
+                }).toDestination();
+
+                    // Now you can use `sampler` safely
+                    console.log("Sampler initialized with local sounds.");
+                    return sampler;
+                },
+                () => console.log("Error: Failed to load local sound samples.")
+            );
+
+
+        } else {
+            return new Tone.Sampler({
+                urls: {
+                    "C4": "C4.mp3",
+                    "C#4": "Db4.mp3",
+                    "Db4": "Db4.mp3",
+                    "D4": "D4.mp3",
+                    "D#4": "Eb4.mp3",
+                    "Eb4": "Eb4.mp3",
+                    "E4": "E4.mp3",
+                    "F4": "F4.mp3",
+                    "F#4": "Gb4.mp3",
+                    "Gb4": "Gb4.mp3",
+                    "G4": "G4.mp3",
+                    "Ab4": "Ab4.mp3",
+                    "G#4": "Ab4.mp3",
+                    "A4": "A4.mp3",
+                    "A#4": "Bb4.mp3",
+                    "Bb4": "Bb4.mp3",
+                    "B4": "B4.mp3",
+                },
+                baseUrl: baseUrl,
+                onload: () => {
+                    console.log("Piano loaded!");
+                }
+            }).toDestination();
+        }
+    }
+
     // Create a new sampler to play sounds via Tone.js.
     // Note that the sampler can play tones which are not listed in the sounds
     // below, e.g., it can generate and play "C5" even if there is no "C5.mp3" file.
     // So even when adding more keys/octaves to the piano, there is no need to add
     // more sounds to the sampler.
+    /*
     const piano = new Tone.Sampler({
         urls: {
             "C4": "C4.mp3",
@@ -77,6 +195,8 @@ function initializePiano(options = {}) {
             console.log("Piano loaded!");
         }
     }).toDestination();
+    */
+    const piano = getSampledPiano(use_local_samples);
 
     let isMouseDown = false; // Track if the mouse button is pressed
     let lastPlayedNote = null; // Track the last played note to avoid repeats
