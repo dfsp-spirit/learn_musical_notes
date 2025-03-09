@@ -81,7 +81,7 @@
          * Function which do not start with an underscore are event listeners or functions that interact with the DOM, or functions
          * that interact with global variables.
          *
-         * Global variables are prefixed with `g_`, like `g_currentNote`.
+         * Global variables are prefixed with `G_`, like `G_currentNote`.
          *
          **/
 
@@ -96,7 +96,7 @@
         let G_correct_identification_times = []; // list of times for correct identifications
 
         let G_currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";   // The current note system to use, like "international", "german", or "solfege".
-        let G_currentNote = ""; // current note being displayed
+        let G_currentNote = ""; // current note being displayed (the task: identify this note)
 
         let G_currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use. Auto means to use a suitable clef based on the note. Other options are "bass", "treble", "alto".
 
