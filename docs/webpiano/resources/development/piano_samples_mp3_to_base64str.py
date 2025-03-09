@@ -4,11 +4,14 @@
 # We use this to prevent CORS issues when loading local audio files in the browser: MP3 files cannot be loaded directly, so
 # we encode them as Base64 strings and use the data URI scheme to embed them in the JavaScript code.
 #
-# This allows using the WebPiano offline without a server, by loading the sounds from the local filesystem. If you have a webserver,
+# This allows using the WebPiano offline without a server, by loading the sounds locally without loading files from the local
+# filesystem ( CORS applies by file type, and loading .js files locally is considered fine). If you have a webserver,
 # you can simply serve the MP3 files and load them directly in the WebPiano.
 #
 # This script has already been run during development, to produce the file `sounds.js`. Unless you change samples or add new ones,
 # you don't need to run this script again. If you do, make sure to update the `INPUT_FOLDER` variable to point to the correct directory.
+#
+# After running this script, you need to manually copy the generated `sounds.js` file to the `webpiano` source directory, over the exiting file.
 #
 
 import base64
