@@ -69,7 +69,7 @@
 
 
     <div id="notation"></div>
-    <div id="buttons"></div>
+    <div id="answer_buttons"></div>
     <p id="result"></p>
 
     <script>
@@ -337,7 +337,7 @@
 
         // Create answer buttons for the current note system.
         function createAnswerButtons() {
-            const container = document.getElementById("buttons");
+            const container = document.getElementById("answer_buttons");
             container.innerHTML = "";
             _getNoteNotationSystems()[G_currentNotation].forEach(note => {
                 const btn = document.createElement("button");

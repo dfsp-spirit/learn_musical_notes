@@ -62,7 +62,7 @@
         #score_status_percent { color:rgb(160, 160, 160) }
         #time_status { margin: 20px; min-height: 40px; }
         #time_status_last_ten { margin: 20px; min-height: 40px; }
-        #buttons { margin-top: 20px; }
+        #answer_buttons { margin-top: 20px; }
         button { margin: 5px; padding: 10px; font-size: 16px; }
         button:disabled {
             background-color: gray;
@@ -71,7 +71,7 @@
             opacity: 0.6;
         }
         #notation { margin: 0 auto; width: 200px; min-height: 80px; }
-        .notation-large { font-size: 24px; }
+        .notation-large { font-size: 32px; }
         .answer-btn-note-image {
             width: 5vw;
             max-width: 100%;

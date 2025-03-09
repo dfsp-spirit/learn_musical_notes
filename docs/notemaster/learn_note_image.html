@@ -63,13 +63,16 @@
     </div>
 
     <div id="score_wrapper" title="Your score.">
-        <span id="score_status" title="Go for it!">Click the note image below that shows the following note:</span>
+        <span id="score_status" title="Go for it!"></span>
         <span id="score_status_percent" title="Percentage of correct answers"></span>
+        <br />
+        <br />
+        <div id="instruction" title="Go for it!">Click the note image below that shows the following note:</div>
     </div>
 
 
     <div id="notation" class="notation-large"></div>
-    <div id="buttons"></div>
+    <div id="answer_buttons"></div>
     <p id="result"></p>
 
     <script>
@@ -270,6 +273,10 @@
             return similarNotesSPN;
         }
 
+        // Compute full info fields for a note in scientific pitch notation (SPN), like 'C4'.
+        // @param noteSPN: The note in scientific pitch notation, like 'C4'.
+        // @param isCorrect: A boolean indicating if the note is the correct one in the current question.
+        // @return: An object with the fields 'noteSPN', 'notePlain', 'octaveSPN', 'noteAbc', 'suggestedCleve', and 'correct'.
         function noteSPNToFullInfo(noteSPN, isCorrect) {
             const notePlain = noteSPN.slice(0, -1);
             const octave = noteSPN.slice(-1);
@@ -290,7 +297,7 @@
         function renderMusicalTask() {
             const noteSystems = _getNoteNotationSystems();
             const available_notes = noteSystems[G_currentNotation];
-            const lastNote = getCorrectNoteAbcJS();
+            const lastNote = getCorrectNoteSPN();
             currentNote = getRandomNote(available_notes, lastNote);
             currentOctave = _getRandomOctaveFrom(G_selectedOctaves);
             currentNoteSPN = _plainNoteAndOctaveToSPN(currentNote, currentOctave);
@@ -346,11 +353,7 @@
             });
         }
 
-        function getCorrectNoteAbcJS() {
-            console.log("type of G_current_answer_options:", typeof G_current_answer_options, G_current_answer_options);
-            return G_current_answer_options.find(option => option.correct)?.noteAbc;
-        }
-
+        // Get the correct note in scientific pitch notation (SPN) for the current question.
         function getCorrectNoteSPN() {
             console.log("type of G_current_answer_options:", typeof G_current_answer_options, G_current_answer_options);
             return G_current_answer_options.find(option => option.correct)?.noteSPN;
@@ -358,16 +361,20 @@
 
         // Check if the answer is correct and update the score and various timings and statistics.
         function checkAnswer(noteSPN) {
+            console.log("Checking answer ", noteSPN);
             const result = document.getElementById("result");
             const currentNote = getCorrectNoteSPN();
+            console.log("Correct note is ", currentNote);
             let isCorrect = false;
             if (noteSPN === currentNote) {
+                console.log("Correct!");
                 isCorrect = true;
                 result.textContent = "✅ Correct, it's " + noteSPN + "!";
                 G_num_correct++;
                 const time_to_answer = Date.now() - G_display_note_start_time;
                 G_correct_identification_times.push(time_to_answer);
             } else {
+                console.log("Incorrect! Correct note is ", currentNote, " but user clicked ", noteSPN);
                 result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + noteSPN + ".";
             }
             G_num_tries++;
@@ -421,7 +428,7 @@
 
         // Create answer buttons for the current note system.
         function createAnswerButtons() {
-            const container = document.getElementById("buttons");
+            const container = document.getElementById("answer_buttons");
             container.innerHTML = "";
             G_current_answer_options.forEach(note => {
                 const btn = document.createElement("button");
@@ -437,8 +444,10 @@
 
                 btn.classList.add("answer-btn");
                 btn.classList.add("answer-btn-note-image");
-                btn.onclick = () => checkAnswer(noteSPN);
+                btn.classList.add("answer-btn-note-image-" + noteSPN +"-" + suggestedClef);
+                btn.onclick = checkAnswer.bind(null, noteSPN);
                 container.appendChild(btn);
+                console.log("-Created button for note", noteSPN, "is correct: ", note.correct);
             });
         }
 
@@ -514,8 +523,7 @@
 
         // Initialize checkboxes
         generateIncludedOctavesCheckboxes();
-        createAnswerButtons();
-        renderMusicalTask();
+        renderMusicalTask(); // Start the quiz
     </script>
 </body>
 </html>
