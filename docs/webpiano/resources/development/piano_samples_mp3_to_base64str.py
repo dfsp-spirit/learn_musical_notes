@@ -52,6 +52,7 @@ def generate_sounds_js():
         js_file.write("};\n")
 
     print(f"Generated file '{OUTPUT_FILE}' with {len(sounds_dict)} sounds.")
+    print(f"IMPORTANT: Make sure to copy the '{OUTPUT_FILE}' file to the 'webpiano' directory when you are happy with it.")
 
 if __name__ == "__main__":
     generate_sounds_js()
