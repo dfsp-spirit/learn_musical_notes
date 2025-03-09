@@ -278,12 +278,13 @@
         // @param isCorrect: A boolean indicating if the note is the correct one in the current question.
         // @return: An object with the fields 'noteSPN', 'notePlain', 'octaveSPN', 'noteAbc', 'suggestedCleve', and 'correct'.
         function noteSPNToFullInfo(noteSPN, isCorrect) {
+            console.log("Converting note '" + noteSPN + "' to full info.");
             const notePlain = noteSPN.slice(0, -1);
             const octave = noteSPN.slice(-1);
             const noteSystems = _getNoteNotationSystems();
             const noteIndex = noteSystems["international"].indexOf(notePlain);
             const noteName = noteSystems[G_currentNotation][noteIndex];
-            const [noteAbc, suggestedCleve] = _plainNoteToAbcJS(noteName, octave);
+            const [noteAbc, suggestedCleve] = _plainNoteToAbcJS(notePlain, octave);
             return { "noteSPN": noteSPN,
                      "notePlain":notePlain,
                      "octaveSPN": octave,
@@ -293,20 +294,36 @@
                     } ;
         }
 
+        function noteSPNToCurrentNotation(noteSPN, withOctave=false) {
+            const notePlain = noteSPN.slice(0, -1);
+            const octave = noteSPN.slice(-1);
+            const noteSystems = _getNoteNotationSystems();
+            const noteIndex = noteSystems["international"].indexOf(notePlain);
+            if(noteIndex === -1) {
+                console.error("Invalid note name", notePlain);
+                return "Invalid note";
+            }
+            const noteName = noteSystems[G_currentNotation][noteIndex];
+            if (withOctave) {
+                return noteName + octave;
+            } else {
+                return noteName;
+            }
+        }
+
         // Render a new musical note (task) on the screen and start the timer.
         function renderMusicalTask() {
             const noteSystems = _getNoteNotationSystems();
-            const available_notes = noteSystems[G_currentNotation];
+            const available_notes = noteSystems["international"];
             const lastNote = getCorrectNoteSPN();
             currentNote = getRandomNote(available_notes, lastNote);
             currentOctave = _getRandomOctaveFrom(G_selectedOctaves);
             currentNoteSPN = _plainNoteAndOctaveToSPN(currentNote, currentOctave);
-            const noteName = noteSystems["international"][noteSystems[G_currentNotation].indexOf(currentNote)];
-            const [noteNameAbc, suggestedCleve] = _plainNoteToAbcJS(noteName, currentOctave);
+            const [noteNameAbc, suggestedCleve] = _plainNoteToAbcJS(currentNote, currentOctave);
             const usedclef = G_currentClef === "auto" ? suggestedCleve : G_currentClef;
 
             notation = document.getElementById("notation");
-            notation.innerHTML = currentNoteSPN;
+            notation.innerHTML = noteSPNToCurrentNotation(currentNoteSPN);
 
             // Draw a set of answer options (note  names) for the current note.
             // The notes must include the current note (the correct one) and some incorrect but similar notes.
@@ -356,7 +373,11 @@
         // Get the correct note in scientific pitch notation (SPN) for the current question.
         function getCorrectNoteSPN() {
             console.log("type of G_current_answer_options:", typeof G_current_answer_options, G_current_answer_options);
-            return G_current_answer_options.find(option => option.correct)?.noteSPN;
+            const note = G_current_answer_options.find(option => option.correct)?.noteSPN;
+            if (!note) {
+                return "";
+            }
+            return note;
         }
 
         // Check if the answer is correct and update the score and various timings and statistics.
@@ -480,7 +501,7 @@
             radio.addEventListener("change", (event) => {
                 G_currentNotation = event.target.value;
                 localStorage.setItem("currentNotation", JSON.stringify(G_currentNotation)); // Save to localStorage
-                createAnswerButtons();
+                renderMusicalTask();
             });
         });
 
