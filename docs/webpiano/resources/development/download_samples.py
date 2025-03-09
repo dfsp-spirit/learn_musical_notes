@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+#
+# This script downloads the MP3 samples for the WebPiano from the FatBoy soundfont repository from Github.com.
+# The samples are downloaded to the `samples` directory, where they can be used by the WebPiano.
+# The output directory is already filled with the samples used by the WebPiano, so you don't need to run this script unless you want to update the samples.
+#
+
 
 import requests   # pip install requests
 import os
