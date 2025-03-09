@@ -13,7 +13,7 @@ function initializePiano(options = {}) {
 
 
     // Load the sounds.js file if using local samples
-    function loadScript(src, callback, errorCallback) {
+    async function loadScript(src, callback, errorCallback) {
         const script = document.createElement("script");
         script.src = src;
         script.onload = callback;
@@ -104,65 +104,73 @@ function initializePiano(options = {}) {
         }
     }
 
-    // Create a piano using Tone.js.
-    // Depending on the `use_local_samples` variable, the piano will use either local samples from the file sounds.js or online samples from Github.com.
     function getSampledPiano(use_local_samples = true) {
-        if(use_local_samples) {
-            // If offline, use local samples from `sounds.js` into variable `sounds`.
+        return new Promise((resolve, reject) => {
+            if (use_local_samples) {
+                loadScript(
+                    "sounds.js",
+                    () => {
+                        console.log("Loaded local sounds.js");
 
-            loadScript(
-                "sounds.js",
-                () => {
-                    console.log("Loaded local sounds.js");
+                        const NOTES = ["C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4"];
 
-                    const NOTES = ["C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4"];
+                        // Convert Base64 MP3 data to Blob URLs
+                        const samples = Object.fromEntries(
+                            NOTES.map(note => [note, base64ToBlobUrl(sounds[note])])
+                        );
 
-                    const samples = NOTES.map(note => [note, base64ToBlobUrl(sounds[note])]);
-
-                    const sampler = new Tone.Sampler({
-                        urls : samples, // Now sounds is defined!
-                        baseUrl: baseUrl,
-                        onload: () => {
-                            console.log("Piano loaded!");
-                        }
+                        // Create the sampler with Blob URLs
+                        const sampler = new Tone.Sampler({
+                            urls: samples,
+                            onload: () => {
+                                console.log("Piano loaded with local sounds!");
+                                resolve(sampler);
+                            }
+                        }).toDestination();
+                    },
+                    () => {
+                        console.error("Error: Failed to load local sound samples.");
+                        reject(new Error("Failed to load local sound samples."));
+                    }
+                );
+            } else {
+                // Load external MP3 files from a URL
+                const sampler = new Tone.Sampler({
+                    urls: {
+                        "C4": "C4.mp3",
+                        "Db4": "Db4.mp3",
+                        "D4": "D4.mp3",
+                        "Eb4": "Eb4.mp3",
+                        "E4": "E4.mp3",
+                        "F4": "F4.mp3",
+                        "Gb4": "Gb4.mp3",
+                        "G4": "G4.mp3",
+                        "Ab4": "Ab4.mp3",
+                        "A4": "A4.mp3",
+                        "Bb4": "Bb4.mp3",
+                        "B4": "B4.mp3",
+                    },
+                    baseUrl: baseUrl,
+                    onload: () => {
+                        console.log("Piano loaded with external sounds.");
+                        resolve(sampler);
+                    }
                 }).toDestination();
-
-                    // Now you can use `sampler` safely
-                    console.log("Sampler initialized with local sounds.");
-                    return sampler;
-                },
-                () => console.log("Error: Failed to load local sound samples.")
-            );
-
-
-        } else {
-            return new Tone.Sampler({
-                urls: {
-                    "C4": "C4.mp3",
-                    "C#4": "Db4.mp3",
-                    "Db4": "Db4.mp3",
-                    "D4": "D4.mp3",
-                    "D#4": "Eb4.mp3",
-                    "Eb4": "Eb4.mp3",
-                    "E4": "E4.mp3",
-                    "F4": "F4.mp3",
-                    "F#4": "Gb4.mp3",
-                    "Gb4": "Gb4.mp3",
-                    "G4": "G4.mp3",
-                    "Ab4": "Ab4.mp3",
-                    "G#4": "Ab4.mp3",
-                    "A4": "A4.mp3",
-                    "A#4": "Bb4.mp3",
-                    "Bb4": "Bb4.mp3",
-                    "B4": "B4.mp3",
-                },
-                baseUrl: baseUrl,
-                onload: () => {
-                    console.log("Piano loaded!");
-                }
-            }).toDestination();
-        }
+            }
+        });
     }
+
+    let piano = null; // The global sampler object
+    getSampledPiano(true).then(sampler => {
+        window.piano = sampler;
+        console.log("Sampler is ready:", sampler);
+        //sampler.triggerAttack("C4"); // Play a note!
+    }).catch(err => console.error(err));
+
+
+
+
+
 
     // Create a new sampler to play sounds via Tone.js.
     // Note that the sampler can play tones which are not listed in the sounds
@@ -196,7 +204,7 @@ function initializePiano(options = {}) {
         }
     }).toDestination();
     */
-    const piano = getSampledPiano(use_local_samples);
+
 
     let isMouseDown = false; // Track if the mouse button is pressed
     let lastPlayedNote = null; // Track the last played note to avoid repeats
@@ -207,7 +215,7 @@ function initializePiano(options = {}) {
         if (Tone.context.state !== 'running') {
             Tone.context.resume(); // Resume the AudioContext if it's suspended
         }
-        piano.triggerAttackRelease(note, "8n"); // Play the note for an 8th note duration
+        window.piano.triggerAttackRelease(note, "8n"); // Play the note for an 8th note duration
     }
 
     const keys = document.querySelectorAll('.key');
