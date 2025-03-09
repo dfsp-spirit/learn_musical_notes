@@ -278,7 +278,6 @@
         // @param isCorrect: A boolean indicating if the note is the correct one in the current question.
         // @return: An object with the fields 'noteSPN', 'notePlain', 'octaveSPN', 'noteAbc', 'suggestedCleve', and 'correct'.
         function noteSPNToFullInfo(noteSPN, isCorrect) {
-            console.log("Converting note '" + noteSPN + "' to full info.");
             const notePlain = noteSPN.slice(0, -1);
             const octave = noteSPN.slice(-1);
             const noteSystems = _getNoteNotationSystems();
@@ -328,11 +327,9 @@
             // Draw a set of answer options (note  names) for the current note.
             // The notes must include the current note (the correct one) and some incorrect but similar notes.
             const similarNotesSPN = getSimilarNotes(currentNoteSPN, 2, 2);
-            console.log("Similar notes to", currentNoteSPN, ":", similarNotesSPN);
             const allNotes = [currentNoteSPN, ...similarNotesSPN];
             // Shuffle the notes to randomize the order
             allNotes.sort(() => Math.random() - 0.5);
-            console.log("All notes:", allNotes);
 
             // Create answer options for the current notes
             G_current_answer_options = allNotes.map(note => noteSPNToFullInfo(note, note === currentNoteSPN));
@@ -372,7 +369,6 @@
 
         // Get the correct note in scientific pitch notation (SPN) for the current question.
         function getCorrectNoteSPN() {
-            console.log("type of G_current_answer_options:", typeof G_current_answer_options, G_current_answer_options);
             const note = G_current_answer_options.find(option => option.correct)?.noteSPN;
             if (!note) {
                 return "";
@@ -382,21 +378,18 @@
 
         // Check if the answer is correct and update the score and various timings and statistics.
         function checkAnswer(noteSPN) {
-            console.log("Checking answer ", noteSPN);
             const result = document.getElementById("result");
-            const currentNote = getCorrectNoteSPN();
-            console.log("Correct note is ", currentNote);
+            const currentCorrectNote = getCorrectNoteSPN();
             let isCorrect = false;
-            if (noteSPN === currentNote) {
+            if (noteSPN === currentCorrectNote) {
                 console.log("Correct!");
                 isCorrect = true;
-                result.textContent = "✅ Correct, it's " + noteSPN + "!";
+                result.textContent = "✅ Correct, it's " + noteSPNToCurrentNotation(noteSPN) + "!";
                 G_num_correct++;
                 const time_to_answer = Date.now() - G_display_note_start_time;
                 G_correct_identification_times.push(time_to_answer);
             } else {
-                console.log("Incorrect! Correct note is ", currentNote, " but user clicked ", noteSPN);
-                result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + noteSPN + ".";
+                result.textContent = "❌ Try again with a different note! You clicked " + noteSPNToCurrentNotation(noteSPN) + ", not " + noteSPNToCurrentNotation(currentCorrectNote) + ".";
             }
             G_num_tries++;
             if (G_display_note_interval) clearInterval(G_display_note_interval);
@@ -465,10 +458,9 @@
 
                 btn.classList.add("answer-btn");
                 btn.classList.add("answer-btn-note-image");
-                btn.classList.add("answer-btn-note-image-" + noteSPN +"-" + suggestedClef);
+                //btn.classList.add("answer-btn-note-image-" + noteSPN +"-" + suggestedClef);
                 btn.onclick = checkAnswer.bind(null, noteSPN);
                 container.appendChild(btn);
-                console.log("-Created button for note", noteSPN, "is correct: ", note.correct);
             });
         }
 
