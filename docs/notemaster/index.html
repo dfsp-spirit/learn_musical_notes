@@ -74,8 +74,42 @@
 
     <script>
 
-        // note nomenclature systems
-        function getNoteSystems() {
+        /**
+         * NoteMaster: Identify the Musical Note
+         *
+         * Pure functions in this file are prefixed with an underscore, like `_getNoteNotationSystems`.
+         * Function which do not start with an underscore are event listeners or functions that interact with the DOM, or functions
+         * that interact with global variables.
+         *
+         * Global variables are prefixed with `g_`, like `g_currentNote`.
+         *
+         **/
+
+        // ------------------ Global variables ------------------
+
+        let G_num_correct = 0; // number of correct answers so far in the quiz
+        let G_num_tries = 0;   // number of total tries so far in the quiz
+
+        let G_overall_start_time;  // when the quiz started
+        let G_display_note_start_time;  // when the current note was displayed
+        let G_display_note_interval = null; // interval for updating the current note time
+        let G_correct_identification_times = []; // list of times for correct identifications
+
+        let G_currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";   // The current note system to use, like "international", "german", or "solfege".
+        let G_currentNote = ""; // current note being displayed
+
+        let G_currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use. Auto means to use a suitable clef based on the note. Other options are "bass", "treble", "alto".
+
+        let G_selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // The currently selected octaves, i.e., the ones where random notes are drawn from.
+
+        // ------------------ Functions and App logic ------------------
+
+        generateTopMenu(); // Generate the top menu with links to other quizzes.
+
+        console.log("Starting...");
+
+        // All available note nomenclature systems. The user can select which one to use in the quiz. The selected one is stored in `currentNotation`.
+        function _getNoteNotationSystems() {
             return {
                 international: ["C", "D", "E", "F", "G", "A", "B"],
                 german: ["C", "D", "E", "F", "G", "A", "H"],
@@ -83,39 +117,23 @@
             };
         }
 
-
-        let num_correct = 0; // number of correct answers so far in the quiz
-        let num_tries = 0;   // number of total tries so far in the quiz
-
-        let overall_start_time;  // when the quiz started
-        let display_note_start_time;  // when the current note was displayed
-        let display_note_interval = null; // interval for updating the current note time
-        let correct_identification_times = []; // list of times for correct identifications
-
-        let currentNotation = JSON.parse(localStorage.getItem("currentNotation")) || "international";
-        let currentNote = ""; // current note being displayed
-
-        let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use
-
-        function getAvailableOctaves() { return ["C1", "C2", "C3", "C4", "C5"]; } // List of all octaves.
-        let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // The currently selected octaves, i.e., the ones where random notes are drawn from.
-
-        generateTopMenu(); // Generate the top menu with links to other quizzes.
-
-        console.log("Starting...");
+        // List of all octaves. The user can select which octaves to include in the quiz. The selected ones are stored in `selectedOctaves`.
+        function _getAvailableOctaves() {
+            return ["C1", "C2", "C3", "C4", "C5"];
+        }
 
         // Update the current octaves. Called when user changes the checkboxes in the octave settings menu.
         function updateOctaves() {
-            selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
+            G_selectedOctaves = Array.from(document.querySelectorAll('input[name="octave"]:checked'))
                                 .map(checkbox => checkbox.value);
 
             // If none is selected, select all.
-            if(selectedOctaves.length === 0) {
-                selectedOctaves = [...getAvailableOctaves()];
+            if(G_selectedOctaves.length === 0) {
+                G_selectedOctaves = [..._getAvailableOctaves()];
             }
 
-            localStorage.setItem("selectedOctaves", JSON.stringify(selectedOctaves)); // Save to localStorage
-            console.log("Selected octaves: ", selectedOctaves); // For debugging
+            localStorage.setItem("selectedOctaves", JSON.stringify(G_selectedOctaves)); // Save to localStorage
+            console.log("Selected octaves: ", G_selectedOctaves); // For debugging
             renderMusicalNote(); // We need to draw a new note with the updated octaves, as the old one may be out of range.
         }
 
@@ -124,9 +142,9 @@
             const container = document.getElementById("octave-settings");
             container.innerHTML = "Octaves (SPN):";
 
-            getAvailableOctaves().forEach(octave => {
+            _getAvailableOctaves().forEach(octave => {
                 const label = document.createElement("label");
-                const isChecked = selectedOctaves.includes(octave) ? "checked" : "";
+                const isChecked = G_selectedOctaves.includes(octave) ? "checked" : "";
                 label.innerHTML = `<input type="checkbox" name="octave" value="${octave}" ${isChecked}> ${octave}`;
                 container.appendChild(label);
             });
@@ -163,8 +181,11 @@
             }
         }
 
-        // Draw a random octave from the list of octaves provided. If no list is provided, use the default list.
-        function _getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
+        // Draw a random octave from the list of octaves provided. If no list is provided, use the default list of all available octaves.
+        function _getRandomOctaveFrom(octaves = null) {
+            if(octaves === null || octaves.length === 0) {
+                octaves = _getAvailableOctaves();
+            }
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
@@ -213,32 +234,32 @@
 
         // Render a new musical note on the screen and start the timer.
         function renderMusicalNote() {
-            const noteSystems = getNoteSystems();
-            const available_notes = noteSystems[currentNotation];
-            currentNote = getRandomNote(available_notes, currentNote);
-            const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
-            const [noteNameSPN, suggestedCleve] = _plainNoteToAbcJS(noteName, selectedOctaves);
-            const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
+            const noteSystems = _getNoteNotationSystems();
+            const available_notes = noteSystems[G_currentNotation];
+            G_currentNote = getRandomNote(available_notes, G_currentNote);
+            const noteName = noteSystems["international"][noteSystems[G_currentNotation].indexOf(G_currentNote)];
+            const [noteNameSPN, suggestedCleve] = _plainNoteToAbcJS(noteName, G_selectedOctaves);
+            const usedclef = G_currentClef === "auto" ? suggestedCleve : G_currentClef;
             const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
 
             // set overall time if not set yet
-            if (!overall_start_time) {
-                overall_start_time = Date.now();
+            if (!G_overall_start_time) {
+                G_overall_start_time = Date.now();
             }
 
-            display_note_start_time = Date.now();
-            if (display_note_interval) clearInterval(display_note_interval);
+            G_display_note_start_time = Date.now();
+            if (G_display_note_interval) clearInterval(G_display_note_interval);
 
             // Update total time every 1 second
-            display_note_interval = setInterval(() => {
-                let elapsedSeconds = (Date.now() - overall_start_time) / 1000;
+            G_display_note_interval = setInterval(() => {
+                let elapsedSeconds = (Date.now() - G_overall_start_time) / 1000;
                 document.getElementById("timer_overall").textContent = elapsedSeconds.toFixed(0);
             }, 1000);
 
             // Update current note time every 100 ms
-            display_note_interval = setInterval(() => {
-                let elapsedSeconds = (Date.now() - display_note_start_time) / 1000;
+            G_display_note_interval = setInterval(() => {
+                let elapsedSeconds = (Date.now() - G_display_note_start_time) / 1000;
                 document.getElementById("timer_current_note").textContent = elapsedSeconds.toFixed(1);
             }, 100);
 
@@ -256,38 +277,38 @@
         function checkAnswer(note) {
             const result = document.getElementById("result");
             let isCorrect = false;
-            if (note === currentNote) {
+            if (note === G_currentNote) {
                 isCorrect = true;
                 result.textContent = "✅ Correct, it's " + note + "!";
-                num_correct++;
-                const time_to_answer = Date.now() - display_note_start_time;
-                correct_identification_times.push(time_to_answer);
+                G_num_correct++;
+                const time_to_answer = Date.now() - G_display_note_start_time;
+                G_correct_identification_times.push(time_to_answer);
             } else {
-                result.textContent = "❌ Try again with a different note! It was " + currentNote + ", not " + note + ".";
+                result.textContent = "❌ Try again with a different note! It was " + G_currentNote + ", not " + note + ".";
             }
-            num_tries++;
-            if (display_note_interval) clearInterval(display_note_interval);
+            G_num_tries++;
+            if (G_display_note_interval) clearInterval(G_display_note_interval);
             document.getElementById("timer_current_note").textContent = "0.0"; // Reset timer
             const score_status = document.getElementById("score_status");
-            score_status.textContent = `Score: ${num_correct} / ${num_tries}`;
+            score_status.textContent = `Score: ${G_num_correct} / ${G_num_tries}`;
             const score_status_percent = document.getElementById("score_status_percent");
             // Add score percent correct after current textContent
-            score_status_percent.textContent = `(${(num_correct / num_tries * 100).toFixed(0)}%)`;
+            score_status_percent.textContent = `(${(G_num_correct / G_num_tries * 100).toFixed(0)}%)`;
             score_status.title = "Your score. Keep it up!";
 
             const time_status = document.getElementById("time_status");
 
             // Show average time for correct clicks
-            if(num_correct >= 5) {
-                const average_time = correct_identification_times.reduce((a, b) => a + b, 0) / correct_identification_times.length;
+            if(G_num_correct >= 5) {
+                const average_time = G_correct_identification_times.reduce((a, b) => a + b, 0) / G_correct_identification_times.length;
                 const average_time_s = average_time / 1000;
                 time_status.textContent =`${average_time_s.toFixed(1)} s`;
                 time_status.title = "The average time is for correct answers only.";
             }
 
             const time_status_last_ten = document.getElementById("time_status_last_ten");
-            if(num_correct >= 10) {
-                const last_ten = correct_identification_times.slice(-10);
+            if(G_num_correct >= 10) {
+                const last_ten = G_correct_identification_times.slice(-10);
                 const average_time = last_ten.reduce((a, b) => a + b, 0) / last_ten.length;
                 const average_time_s_last_ten = average_time / 1000;
                 time_status_last_ten.textContent =`${average_time_s_last_ten.toFixed(1)} s`;
@@ -295,13 +316,13 @@
             }
 
             // Log the average time for correct clicks to console every 5 correct clicks
-            if(num_correct % 5 === 0) {
-                console.log("Average time for all correct clicks (after ", correct_identification_times.length, " total correct clicks):", time_status.textContent);
+            if(G_num_correct % 5 === 0) {
+                console.log("Average time for all correct clicks (after ", G_correct_identification_times.length, " total correct clicks):", time_status.textContent);
                 // Also print the average time over just the last 5 correct clicks
-                if(correct_identification_times.length >= 5) {
-                    const last_five = correct_identification_times.slice(-5);
+                if(G_correct_identification_times.length >= 5) {
+                    const last_five = G_correct_identification_times.slice(-5);
                     const average_time_last_five = last_five.reduce((a, b) => a + b, 0) / last_five.length;
-                    console.log("Average time for the last 5 correct clicks (after ", correct_identification_times.length, " total correct clicks):", average_time_last_five / 1000, "s");
+                    console.log("Average time for the last 5 correct clicks (after ", G_correct_identification_times.length, " total correct clicks):", average_time_last_five / 1000, "s");
                 }
             }
 
@@ -318,7 +339,7 @@
         function createAnswerButtons() {
             const container = document.getElementById("buttons");
             container.innerHTML = "";
-            getNoteSystems()[currentNotation].forEach(note => {
+            _getNoteNotationSystems()[G_currentNotation].forEach(note => {
                 const btn = document.createElement("button");
                 btn.textContent = note;
                 btn.classList.add("answer-btn");
@@ -329,16 +350,16 @@
 
         // Start the quiz. Resets score and all timers and statistics.
         function startOver() {
-            num_correct = 0;
-            num_tries = 0;
-            correct_identification_times = [];
+            G_num_correct = 0;
+            G_num_tries = 0;
+            G_correct_identification_times = [];
             console.log("Starting over...");
             const score_status = document.getElementById("score_status");
             score_status.textContent = `Click the correct note name!`;
             score_status.title = "Go for it!";
             const score_status_percent = document.getElementById("score_status_percent");
             score_status_percent.textContent = "";
-            overall_start_time = Date.now();
+            G_overall_start_time = Date.now();
             const time_status = document.getElementById("time_status");
             time_status.textContent = `?`;
             time_status.title = "Need at least 5 successful identifications.";
@@ -354,8 +375,8 @@
         // Attach event listeners for note notation settings
         document.querySelectorAll("input[name='notation']").forEach(radio => {
             radio.addEventListener("change", (event) => {
-                currentNotation = event.target.value;
-                localStorage.setItem("currentNotation", JSON.stringify(currentNotation)); // Save to localStorage
+                G_currentNotation = event.target.value;
+                localStorage.setItem("currentNotation", JSON.stringify(G_currentNotation)); // Save to localStorage
                 createAnswerButtons();
             });
         });
@@ -363,8 +384,8 @@
         // Attach event listeners for clef settings
         document.querySelectorAll("input[name='clef']").forEach(radio => {
             radio.addEventListener("change", (event) => {
-                currentClef = event.target.value;
-                localStorage.setItem("currentClef", JSON.stringify(currentClef)); // Save to localStorage
+                G_currentClef = event.target.value;
+                localStorage.setItem("currentClef", JSON.stringify(G_currentClef)); // Save to localStorage
                 renderMusicalNote();
             });
         });
