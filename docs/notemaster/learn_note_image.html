@@ -450,8 +450,10 @@
                 suggestedClef = note.suggestedCleve;
                 noteSPN = note.noteSPN;
 
+                usedclef = G_currentClef === "auto" ? suggestedClef : G_currentClef;
+
                 // Render the note in the current notation system into the button with abv.js
-                const abcNotation = `X:1\nK:C\n${noteAbcJS}`;
+                const abcNotation =  `X:1\nL:1/4\nK:C ${usedclef}\n ${noteAbcJS}`; //`X:1\nK:C\n${noteAbcJS}`;
                 const visualOptions = { add_classes: true};
                 const visualObj = ABCJS.renderAbc(btn, abcNotation, visualOptions);
 
