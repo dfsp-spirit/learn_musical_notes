@@ -75,11 +75,14 @@
     <script>
 
         // note nomenclature systems
-        const noteSystems = {
-            international: ["C", "D", "E", "F", "G", "A", "B"],
-            german: ["C", "D", "E", "F", "G", "A", "H"],
-            solfege: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"]
-        };
+        function getNoteSystems() {
+            return {
+                international: ["C", "D", "E", "F", "G", "A", "B"],
+                german: ["C", "D", "E", "F", "G", "A", "H"],
+                solfege: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"]
+            };
+        }
+
 
         let num_correct = 0; // number of correct answers so far in the quiz
         let num_tries = 0;   // number of total tries so far in the quiz
@@ -210,6 +213,7 @@
 
         // Render a new musical note on the screen and start the timer.
         function renderMusicalNote() {
+            const noteSystems = getNoteSystems();
             const available_notes = noteSystems[currentNotation];
             currentNote = getRandomNote(available_notes, currentNote);
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
@@ -314,7 +318,7 @@
         function createAnswerButtons() {
             const container = document.getElementById("buttons");
             container.innerHTML = "";
-            noteSystems[currentNotation].forEach(note => {
+            getNoteSystems()[currentNotation].forEach(note => {
                 const btn = document.createElement("button");
                 btn.textContent = note;
                 btn.classList.add("answer-btn");
