@@ -18,6 +18,7 @@ import os
 INPUT_FOLDER = "./samples/"  # Change this if needed
 OUTPUT_FILE = "sounds.js"
 
+
 def encode_mp3_to_base64(mp3_file):
     """Reads an MP3 file and encodes it as a Base64 string."""
     with open(mp3_file, "rb") as f:
@@ -28,6 +29,7 @@ def sanitize_filename(filename):
     return filename.replace("#", "s").replace(".mp3", "")
 
 def generate_sounds_js():
+    print(f"Reading MP3 files from {INPUT_FOLDER}...")
     """Generates a sounds.js file with Base64-encoded MP3 data."""
     sound_files = [f for f in os.listdir(INPUT_FOLDER) if f.endswith(".mp3")]
 
@@ -40,6 +42,7 @@ def generate_sounds_js():
         key = sanitize_filename(file)
         base64_data = encode_mp3_to_base64(os.path.join(INPUT_FOLDER, file))
         sounds_dict[key] = f"data:audio/mp3;base64,{base64_data}"
+        print(f"Encoded {file} as {key}")
 
     # Write to sounds.js
     with open(OUTPUT_FILE, "w", encoding="utf-8") as js_file:
@@ -48,7 +51,7 @@ def generate_sounds_js():
             js_file.write(f'    "{key}": "{base64_str}",\n')
         js_file.write("};\n")
 
-    print(f"Generated {OUTPUT_FILE} with {len(sounds_dict)} sounds.")
+    print(f"Generated file '{OUTPUT_FILE}' with {len(sounds_dict)} sounds.")
 
 if __name__ == "__main__":
     generate_sounds_js()
