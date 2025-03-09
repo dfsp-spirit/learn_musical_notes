@@ -32,7 +32,7 @@
 
 /* -------------------------------------------------------------------------------------- */
 
-body { font-family: Arial, sans-serif; text-align: center; }
+        body { font-family: Arial, sans-serif; text-align: center; }
         #settings {
             display: none; /* Hidden by default */
             padding: 10px;
@@ -71,4 +71,13 @@ body { font-family: Arial, sans-serif; text-align: center; }
             opacity: 0.6;
         }
         #notation { margin: 0 auto; width: 200px; min-height: 80px; }
+        .notation-large { font-size: 24px; }
+        .answer-btn-note-image {
+            width: 5vw;
+            max-width: 100%;
+            padding: 0; /* Remove padding to ensure the button fits tightly around the image */
+            display: inline-flex; /* Use flexbox to center the image (optional) */
+            align-items: center; /* Center the image vertically (optional) */
+            justify-content: center; /* Center the image horizontally (optional) */
+          }
 
