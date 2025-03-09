@@ -94,7 +94,7 @@
 
         let currentClef = JSON.parse(localStorage.getItem("currentClef")) || "auto";   // the clef to use
 
-        let availableOctaves = ["C1", "C2", "C3", "C4", "C5"]; // List of all octaves.
+        function getAvailableOctaves() { return ["C1", "C2", "C3", "C4", "C5"]; } // List of all octaves.
         let selectedOctaves = JSON.parse(localStorage.getItem("selectedOctaves")) || ["C3", "C4"];  // The currently selected octaves, i.e., the ones where random notes are drawn from.
 
         generateTopMenu(); // Generate the top menu with links to other quizzes.
@@ -108,12 +108,12 @@
 
             // If none is selected, select all.
             if(selectedOctaves.length === 0) {
-                selectedOctaves = [...availableOctaves];
+                selectedOctaves = [...getAvailableOctaves()];
             }
 
             localStorage.setItem("selectedOctaves", JSON.stringify(selectedOctaves)); // Save to localStorage
             console.log("Selected octaves: ", selectedOctaves); // For debugging
-            renderMusicalNote();
+            renderMusicalNote(); // We need to draw a new note with the updated octaves, as the old one may be out of range.
         }
 
         // Dynamically generate checkboxes for selecting octaves from `availableOctaves`.
@@ -121,12 +121,11 @@
             const container = document.getElementById("octave-settings");
             container.innerHTML = "Octaves (SPN):";
 
-            availableOctaves.forEach(octave => {
+            getAvailableOctaves().forEach(octave => {
                 const label = document.createElement("label");
                 const isChecked = selectedOctaves.includes(octave) ? "checked" : "";
                 label.innerHTML = `<input type="checkbox" name="octave" value="${octave}" ${isChecked}> ${octave}`;
                 container.appendChild(label);
-                //container.appendChild(document.createElement("br"));
             });
 
             document.querySelectorAll('input[name="octave"]').forEach(checkbox => {
@@ -137,14 +136,14 @@
         // Draw a random note from the current note system. If lastnote is provided, make sure the new note is different.
         // This draws a general note like 'C' or 'F', not a specific note in SPN like 'C4' or 'F2'. The octave is added later.
         // This function artificially makes it less likely to draw a note that is directly adjacent to the last note if lastnote is provided.
-        function getRandomNote(lastnote = "") {
-            const available_notes = noteSystems[currentNotation];
+        // @param available_notes: The list of available notes to draw from (plain notes, without octave info). Depends on the current note system. Example: `["C", "D", "E", "F", "G", "A", "B"]`.
+        function getRandomNote(available_notes, lastnote = "") {
             if (lastnote === "") {  // Just draw a random note if no last note is known
                 return available_notes[Math.floor(Math.random() * available_notes.length)];
             } else {
                 // Use knowledge on last note to:
                 //   * prevent the same note from being drawn again
-                //   * make it less likely (but not impossible) to draw a note that is directly adjacent to the last note
+                //   * make it less likely (but not impossible) to draw a note that is directlyconst available_notes = noteSystems[currentNotation]; adjacent to the last note
 
                 if (Math.random() < 0.05) { // Limit chance to draw adjacent note to 5%. Does never draw identical note.
                     const lastnoteIndex = available_notes.indexOf(lastnote);
@@ -162,7 +161,7 @@
         }
 
         // Draw a random octave from the list of octaves provided. If no list is provided, use the default list.
-        function getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
+        function _getRandomOctaveFrom(octaves = ["C1", "C2", "C3", "C4", "C5", "C6"]) {
             return octaves[Math.floor(Math.random() * octaves.length)];
         }
 
@@ -170,15 +169,15 @@
         // @param noteName: The note name, like `'F'`.
         // @param octave: The octave to use, like `'C4'` (or simply `"4"` or `4` if you prefer). You can also use the string `'random'` to select a random octave. If octave is an array of strings, it is treated as a list of allowed octaves to choose from.
         // @return: A tuple with the note name in abc.js syntax and the suggested clef to use. The clef is either `'treble'` or `'bass'`. Both return values are usable as input fir abc.js.
-        function toOctaveSPN(noteName, octave="C4") {
+        function _plainNoteToAbcJS(noteName, octave="C4") {
 
             if(octave === "random") {
-                octave = getRandomOctaveFrom();
+                octave = _getRandomOctaveFrom();
             }
 
             // If octave is a list of strings, treat it as a list of allowed octaves
             if(Array.isArray(octave)) {
-                octave = getRandomOctaveFrom(octave);
+                octave = _getRandomOctaveFrom(octave);
             }
 
             const note = noteName.toUpperCase();
@@ -211,9 +210,10 @@
 
         // Render a new musical note on the screen and start the timer.
         function renderMusicalNote() {
-            currentNote = getRandomNote(currentNote);
+            const available_notes = noteSystems[currentNotation];
+            currentNote = getRandomNote(available_notes, currentNote);
             const noteName = noteSystems["international"][noteSystems[currentNotation].indexOf(currentNote)];
-            const [noteNameSPN, suggestedCleve] = toOctaveSPN(noteName, selectedOctaves);
+            const [noteNameSPN, suggestedCleve] = _plainNoteToAbcJS(noteName, selectedOctaves);
             const usedclef = currentClef === "auto" ? suggestedCleve : currentClef;
             const abcString = `X:1\nL:1/4\nK:C ${usedclef}\n ${noteNameSPN}`;
             ABCJS.renderAbc("notation", abcString);
