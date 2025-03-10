@@ -137,7 +137,7 @@
             }
 
             localStorage.setItem("selectedOctaves", JSON.stringify(G_selectedOctaves)); // Save to localStorage
-            console.log("Selected octaves: ", G_selectedOctaves); // For debugging
+            //console.log("Selected octaves: ", G_selectedOctaves); // For debugging
             renderMusicalTask(); // We need to draw a new note with the updated octaves, as the old one may be out of range.
         }
 
@@ -163,7 +163,7 @@
         // This function artificially makes it less likely to draw a note that is directly adjacent to the last note if lastnote is provided.
         // @param available_notes: The list of available notes to draw from (plain notes, without octave info). Depends on the current note system. Example: `["C", "D", "E", "F", "G", "A", "B"]`.
         function getRandomNote(available_notes, lastnote = "") {
-            if (lastnote === "") {  // Just draw a random note if no last note is known
+            if ((!lastnote) ||  !available_notes.includes(lastnote))  {  // Just draw a random note if no last note is known
                 return available_notes[Math.floor(Math.random() * available_notes.length)];
             } else {
                 // Use knowledge on last note to:
@@ -310,12 +310,20 @@
             }
         }
 
+        function noteSPNtoPlain(noteSPN) {
+            if (!noteSPN) {
+                return "";
+            }
+            return noteSPN.slice(0, -1);
+        }
+
         // Render a new musical note (task) on the screen and start the timer.
         function renderMusicalTask() {
             const noteSystems = _getNoteNotationSystems();
             const available_notes = noteSystems["international"];
-            const lastNote = getCorrectNoteSPN();
-            currentNote = getRandomNote(available_notes, lastNote);
+            const lastNoteSPN = getCorrectNoteSPN();
+            const lastNotePlain =  noteSPNtoPlain(lastNoteSPN);
+            currentNote = getRandomNote(available_notes, lastNotePlain);
             currentOctave = _getRandomOctaveFrom(G_selectedOctaves);
             currentNoteSPN = _plainNoteAndOctaveToSPN(currentNote, currentOctave);
             const [noteNameAbc, suggestedCleve] = _plainNoteToAbcJS(currentNote, currentOctave);
