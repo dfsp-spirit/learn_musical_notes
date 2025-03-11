@@ -443,6 +443,7 @@
             document.querySelectorAll(".answer-btn").forEach(button => {
                 button.disabled = true;
             });
+            document.querySelector('.answer-btn-correct').style.backgroundColor = 'green';
             const timeout = isCorrect ? 1000 : 2000;
             setTimeout(renderMusicalTask, timeout);
         }
@@ -457,6 +458,7 @@
                 noteAbcJS = note.noteAbc;
                 suggestedClef = note.suggestedCleve;
                 noteSPN = note.noteSPN;
+                isCorrect = note.correct;
 
                 usedclef = G_currentClef === "auto" ? suggestedClef : G_currentClef;
 
@@ -467,8 +469,14 @@
 
                 btn.classList.add("answer-btn");
                 btn.classList.add("answer-btn-note-image");
-                //btn.classList.add("answer-btn-note-image-" + noteSPN +"-" + suggestedClef);
-                btn.onclick = checkAnswer.bind(null, noteSPN);
+                btn.classList.add("answer-btn-note-image-" + noteSPN +"-" + suggestedClef);
+                if(isCorrect) {
+                    btn.classList.add("answer-btn-correct");
+                } else {
+                    btn.classList.add("answer-btn-incorrect");
+                }
+
+                btn.onclick = checkAnswer.bind(null, noteSPN);  // Need to bind, otherwise the function is called immediately.
                 container.appendChild(btn);
             });
         }
