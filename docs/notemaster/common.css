@@ -71,7 +71,7 @@
             opacity: 0.6;
         }
         #notation { margin: 0 auto; width: 200px; min-height: 80px; }
-        .notation-large { font-size: 32px; }
+        .notation-large { font-size: 48px; display: inline-flex; align-items: center; justify-content: center; }
         .answer-btn-note-image {
             width: 5vw;
             max-width: 100%;

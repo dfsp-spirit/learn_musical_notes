@@ -67,11 +67,11 @@
         <span id="score_status_percent" title="Percentage of correct answers"></span>
         <br />
         <br />
-        <div id="instruction" title="Go for it!">Click the note image below that shows the following note:</div>
+        <div id="instruction" title="Go for it!">Click the image below that shows the following note:</div>
     </div>
 
 
-    <div id="notation" class="notation-large"></div>
+    <div id="notation" class="notation-large" title="Click the image with this note below!"></div>
     <div id="answer_buttons"></div>
     <p id="result"></p>
 
@@ -480,7 +480,7 @@
             G_correct_identification_times = [];
             console.log("Starting over...");
             const score_status = document.getElementById("score_status");
-            score_status.textContent = `Click the note image below that shows the following note:`;
+            score_status.textContent = `Click the image below that shows the following note:`;
             score_status.title = "Go for it!";
             const score_status_percent = document.getElementById("score_status_percent");
             score_status_percent.textContent = "";
